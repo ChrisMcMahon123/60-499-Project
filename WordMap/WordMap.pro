@@ -1,4 +1,5 @@
 # allows to add DEPLOYMENTFOLDERS and links to the V-Play library and QtCreator auto-completion
+QT += quick widgets sql
 CONFIG += v-play
 
 # uncomment this line to add the Live Client Module and use live reloading with your custom C++ code
@@ -29,7 +30,9 @@ RESOURCES += #    resources.qrc # uncomment for publishing
 
 
 # The .cpp file which was generated for your project. Feel free to hack it.
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    backEnd.cpp \
+    databaseHelper.cpp
 
 android {
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
@@ -49,3 +52,7 @@ win32 {
 macx {
     ICON = macx/app_icon.icns
 }
+
+HEADERS += \
+    backEnd.h \
+    databaseHelper.h

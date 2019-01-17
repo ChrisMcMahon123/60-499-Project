@@ -3,10 +3,16 @@
 
 #include <QQmlApplicationEngine>
 
+#include "backEnd.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    //registered name must be capitalized ie backEnd doesn't work
+    //QML: import WordMap.BackEnd 1.0
+    qmlRegisterType<backEnd>("WordMap.BackEnd", 1, 0, "BackEnd");
+
     VPApplication vplay;
 
     // Use platform-specific fonts instead of V-Play's default font
