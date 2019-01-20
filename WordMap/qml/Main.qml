@@ -11,18 +11,20 @@ import WordMap.BackEnd 1.0
 App {
     id: root
     height: 700
-    width: 500
+    width: 499 //changes to 500 to 'fix' layout issue on window load
 
     Item {
         id: localVariables
         property string settingsType: ""
         property string fileFilter: ""
-
     }
 
     BackEnd {
         id: backEnd
 
+        onInputTextChanged: {
+            textEdit.text = backEnd.inputText
+        }
     }
 
     // You get free licenseKeys from https://v-play.net/licenseKey
@@ -296,6 +298,7 @@ App {
             //open file stream and get the contents of the file
             //put the contents of the file into the textarea
             //console.log("Selected File: " + fileDialog.fileUrls)
+            backEnd.fileUrl = fileDialog.fileUrl
         }
     }
 
@@ -335,6 +338,14 @@ App {
         visible: false
         id: textFilterDialog
         title: qsTr("Edit Text Filter List")
+    }
 
+    //work around for the layouts not properly being set on window load
+    Component.onCompleted: {
+        onLoad()
+    }
+
+    function onLoad() {
+        root.width = root.width +1
     }
 }
