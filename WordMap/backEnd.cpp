@@ -5,8 +5,13 @@ backEnd::backEnd(QObject *parent) : QObject(parent)
 {
     //true = drop tables | false = keep existing data
     m_database_helper = databaseHelper(true);
+
+    //default formatting values
+    resetInputs();
 }
 
+//PUBLIC FUNCTIONS
+//Q_PROPERTY
 //setter methods
 void backEnd::setFontStyle(const QFont &font)
 {
@@ -20,97 +25,16 @@ void backEnd::setFontColor(const QColor &color)
     qDebug() << "Font Color: " << m_font_color;
 }
 
-void backEnd::setFontAlpha(const int &alpha)
-{
-    m_font_alpha = alpha;
-    qDebug() << "Font Alpha: " << m_font_alpha;
-}
-
 void backEnd::setBackgroundColor(const QColor &color)
 {
     m_background_color = color;
     qDebug() << "Background Color: " << m_background_color;
 }
 
-void backEnd::setBackgroundAlpha(const int &alpha)
+void backEnd::setBackgroundImageUrl(const QUrl &url)
 {
-    m_background_alpha = alpha;
-    qDebug() << "Background Alpha: " << m_background_alpha;
-}
-
-void backEnd::setFileUrl(const QUrl &url)
-{
-    m_file_url = url;
-    m_input_text = "";
-    m_word_list.clear();
-    m_word_frequency.clear();
-
-    qDebug() << "File URL: " << m_file_url;
-
-    //parse the selected file and update the variables
-    QFile file(m_file_url.path());
-    if(!file.open(QIODevice::ReadOnly))
-    {
-        qDebug() << "[ERROR] Failed to open text file";
-    }
-    else
-    {
-        QTextStream input(&file);
-
-        while(!input.atEnd())
-        {
-            QString line = input.readLine();
-            m_input_text += line + "\n";
-
-            //remove everything except for letters (ie punctuation and numbers are removed)
-            line = line.remove(QRegularExpression("[^a-zA-Z\\d\\s]"));
-
-            //seperate each word and insert it into the data structures, calculating its frequency on inserting
-            for(QString word : line.split(" ", QString::SkipEmptyParts))
-            {
-                word = word.toLower();//don't care about case sensitivity
-
-                qDebug() << "Split word: " << word;
-
-                if(m_word_list.contains(word))
-                {
-                    m_word_list[word] ++;
-                }
-                else
-                {
-                    m_word_list.insert(word, 1);
-                }
-            }
-        }
-
-        file.close();
-    }
-
-
-    //need to sort the unordered word list
-    //moves the unordered Hash table into a vector that can be sorted
-    QHashIterator<QString, int> iterator(m_word_list);
-
-    qDebug() << "Unsorted Word List: ";
-    while (iterator.hasNext())
-    {
-        iterator.next();
-        qDebug() << "Key: " << iterator.key() << " Value: " << iterator.value();
-        m_word_frequency.append(QPair<int, QString>(iterator.value(), iterator.key()));
-    }
-
-    //sorts in accending order
-    qSort(m_word_frequency.begin(), m_word_frequency.end());
-
-    ///*
-    qDebug() << "Sorted Word List: ";
-    for (QPair<int, QString> pair : m_word_frequency)
-    {
-        qDebug() << "Key: " << pair.first << " Value: " << pair.second;
-    }
-    //*/
-
-    emit inputTextChanged();
+    m_background_image_url = url;
+    qDebug() << "Background Image Url: " << m_background_image_url;
 }
 
 //getter methods
@@ -124,27 +48,149 @@ QColor backEnd::fontColor()
     return m_font_color;
 }
 
-int backEnd::fontAlpha()
-{
-    return m_font_alpha;
-}
-
 QColor backEnd::backgroundColor()
 {
     return m_background_color;
 }
 
-int backEnd::backgroundAlpha()
+QUrl backEnd::backgroundImageUrl()
 {
-    return m_background_alpha;
+    return m_background_image_url;
 }
 
-QUrl backEnd::fileUrl()
+//Q_INVOKABLE
+//given a URL for a text file, this function will extract the contents of it and store
+//it in a QString variable that it will return.
+QString backEnd::textFileContents(const QUrl &url)
 {
-    return m_file_url;
+    QFile file(url.path());
+
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "[ERROR] Failed to open text file";
+        return "[ERROR] Failed to open text file";
+    }
+    else
+    {
+        //https://doc.qt.io/qt-5/implicit-sharing.html
+        QTextStream input(&file);
+        QString text = "";
+
+        while(!input.atEnd())
+        {
+            //will end on /n, need to manually add it back to preserve document
+            text += input.readLine() + "\n";
+        }
+
+        file.close();
+
+        return text;
+    }
 }
 
-QString backEnd::inputText() {
-    return m_input_text;
+//will set all user input variables to their default values. All changes the user
+//has made will be lost when this function is called.
+void backEnd::resetInputs()
+{
+    //set variables to their default format values
+    m_font_style = QFont("Sans Serif,9,-1,5,50,0,0,0,0,0");//sans serif, 9 font size
+    m_font_color = QColor(0, 0, 0, 1);//black
+    m_background_color = QColor(1, 1, 1, 1);//white
+    m_background_image_url = QUrl();
+    m_word_list.clear();
+    m_word_list_ordered.clear();
+
+    qDebug() << "Reset Input Variables";
+    qDebug() << "Font Style: " << m_font_style;
+    qDebug() << "Font Color: " << m_font_color;
+    qDebug() << "Background Color: " << m_background_color;
 }
 
+//public function that the frontend will call to generate the wordmap. If all inputs
+//are valid, the word map dialog will open (1), else an error dialog will be shown (-1)
+int backEnd::generateWordMap(QString text)
+{
+    //check to ensure all variables are set
+    if(text != "") {
+        //generate the hashmap to get the frequency of each word
+        m_word_list.operator=(wordList(text));
+        qDebug() << "Unsorted Word List: ";
+        qDebug() << m_word_list;
+
+        //get an ordered vector of the words
+        m_word_list_ordered.operator=(wordListOrdered(m_word_list));
+        qDebug() << "Sorted Word List: ";
+        qDebug() << m_word_list_ordered;
+
+        qDebug() << "Font Style: " << m_font_style;
+        qDebug() << "Font Color: " << m_font_color;
+        qDebug() << "Background Color: " << m_background_color;
+
+        return 1;
+    }
+    else {
+        qDebug() << "[ERROR] Not all inputs have values";
+        return -1;
+    }
+}
+
+//PRIVATE FUNCTIONS
+//will return a hashmap that represents the frequency of each word that appears in the text. All
+//punctiation is ignored and newlines. Also words on the ignore list will be filtered out ****
+QHash<QString, int> backEnd::wordList(QString &text)
+{
+    QHash<QString, int> hash;
+    //remove everything except for letters
+    text = text.replace("\n", " ");
+    text = text.remove(QRegularExpression("[^a-zA-Z\\d\\s]"));
+
+    //qDebug() << "Text Words: ";
+    //seperate each word and insert it into the data structures
+    for(QString word : text.split(" ", QString::SkipEmptyParts))
+    {
+        //don't care about case sensitivity
+        word = word.toLower();
+
+        //qDebug() << "Word: " << word;
+
+        //determine the words frequency
+        if(hash.contains(word))
+        {
+            hash[word] ++;
+        }
+        else
+        {
+            hash.insert(word, 1);
+        }
+    }
+
+    return hash;
+}
+
+//given the hashmap words and their frequency, this function will swap the key and values and
+//put them into a vector that will be sorted ascending (least to greatest)
+QVector<QPair<int, QString>> backEnd::wordListOrdered(const QHash<QString, int> &hash)
+{
+    QVector<QPair<int, QString>> vector;
+    QHashIterator<QString, int> iterator(hash);
+
+    //qDebug() << "Unsorted Word List: ";
+    while (iterator.hasNext())
+    {
+        iterator.next();
+        vector.append(QPair<int, QString>(iterator.value(), iterator.key()));
+        //qDebug() << "Key: " << iterator.key() << " Value: " << iterator.value();
+    }
+
+    //sorts in accending order
+    qSort(vector.begin(), vector.end());
+
+    /*
+    qDebug() << "Sorted Word List: ";
+    for (QPair<int, QString> pair : vector)
+    {
+        qDebug() << "Key: " << pair.first << " Value: " << pair.second;
+    }
+    */
+    return vector;
+}

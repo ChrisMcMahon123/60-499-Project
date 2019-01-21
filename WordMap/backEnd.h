@@ -1,7 +1,6 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
-//Qt libraries
 #include <QObject>
 #include <QtDebug>
 #include <QFont>
@@ -15,69 +14,56 @@
 #include <QFile>
 #include <QRegularExpression>
 
-//created libraries
 #include "databaseHelper.h"
 
-//ignore the padding warning, means nothing
 class backEnd : public QObject
 {
     //Q_OBJECT allows for communication between C++ and QML
     Q_OBJECT
-    Q_PROPERTY(QFont fontStyle READ fontStyle WRITE setFontStyle NOTIFY fontStyleChanged)
-    Q_PROPERTY(QColor fontColor READ fontColor WRITE setFontColor NOTIFY fontColorChanged)
-    Q_PROPERTY(int fontAlpha READ fontAlpha WRITE setFontAlpha NOTIFY fontAlphaChanged)
-    Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor NOTIFY backgroundColorChanged)
-    Q_PROPERTY(int backgroundAlpha READ backgroundAlpha WRITE setBackgroundAlpha NOTIFY backgroundAlphaChanged)
-    Q_PROPERTY(QUrl fileUrl READ fileUrl WRITE setFileUrl NOTIFY fileUrlChanged)
-    //Q_PROPERTY(QList wordFrequency READ wordFrequency NOTIFY wordFrequencyChanged)
-    Q_PROPERTY(QString inputText READ inputText NOTIFY inputTextChanged)
-
 public:
-    //constructor with QObject support
-    //for communicating with the QML frontend
+    Q_INVOKABLE QString textFileContents(const QUrl &);
+    Q_INVOKABLE void resetInputs();
+    Q_INVOKABLE int generateWordMap(QString);
+
+    //getter and setter functions are required
+    Q_PROPERTY(QFont fontStyle READ fontStyle WRITE setFontStyle)
+    Q_PROPERTY(QColor fontColor READ fontColor WRITE setFontColor)
+    Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
+    Q_PROPERTY(QUrl backgroundImageUrl READ backgroundImageUrl WRITE setBackgroundImageUrl)
+
+    //constructor
     explicit backEnd(QObject *parent = nullptr);
 
     //getter methods
     QFont fontStyle();
     QColor fontColor();
-    int fontAlpha();
     QColor backgroundColor();
-    int backgroundAlpha();
-    QUrl fileUrl();
-    QHash<QString, int> wordFrequency();
-    QString inputText();
+    QUrl backgroundImageUrl();
 
     //setter methods
     void setFontStyle(const QFont &);
     void setFontColor(const QColor &);
-    void setFontAlpha(const int &);
     void setBackgroundColor(const QColor &);
-    void setBackgroundAlpha(const int &);
-    void setFileUrl(const QUrl &);
+    void setBackgroundImageUrl(const QUrl &);
 
 signals:
-    void fontStyleChanged();
-    void fontColorChanged();
-    void fontAlphaChanged();
-    void backgroundColorChanged();
-    void backgroundAlphaChanged();
-    void fileUrlChanged();
-    void wordFrequencyChanged();
-    void inputTextChanged();
 
 private:
     //internal functions
+    QHash<QString, int> wordList(QString &);
+    QVector<QPair<int, QString>> wordListOrdered(const QHash<QString, int> &);
 
     //internal variables
     QFont m_font_style;
     QColor m_font_color;
-    int m_font_alpha;
     QColor m_background_color;
-    int m_background_alpha;
-    QUrl m_file_url;
-    QHash<QString, int> m_word_list;//non ordered list of words and their frequencies
-    QVector<QPair<int, QString>> m_word_frequency;//ordered from most occuring to least occuring
-    QString m_input_text;
+    QUrl m_background_image_url;
+
+    //non ordered list of words and their frequencies
+    QHash<QString, int> m_word_list;
+
+    //ordered from most occuring to least occuring
+    QVector<QPair<int, QString>> m_word_list_ordered;
 
     databaseHelper m_database_helper;
 };

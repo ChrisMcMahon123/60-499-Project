@@ -6,25 +6,32 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.3
 
 //library name comes from main.cpp
-import WordMap.BackEnd 1.0
+import WordMap.BackEnd 1.2
 
 App {
     id: root
     height: 700
     width: 499 //changes to 500 to 'fix' layout issue on window load
 
+    //work around for the layouts not properly being set on window load
+    //oddly enough this works 95% of the time. need to look into this more ***
+    Component.onCompleted: {
+        onLoad()
+    }
+
+    function onLoad() {
+        root.width = root.width +1
+    }
+
     Item {
         id: localVariables
         property string settingsType: ""
         property string fileFilter: ""
+        property int scriptStatus: 0
     }
 
     BackEnd {
         id: backEnd
-
-        onInputTextChanged: {
-            textEdit.text = backEnd.inputText
-        }
     }
 
     // You get free licenseKeys from https://v-play.net/licenseKey
@@ -55,7 +62,6 @@ App {
 
             //select text file
             RowLayout {
-                //issue, alignment not set until screen resize
                 width: root.width
 
                 AppText {
@@ -85,7 +91,7 @@ App {
                 Flickable {
                     anchors.fill: parent
 
-                    TextArea.flickable: textEdit
+                    TextArea.flickable: textArea
 
                     //adding a scrollbar to the flickable area
                     ScrollBar.vertical: ScrollBar {
@@ -100,7 +106,7 @@ App {
                 }
 
                 TextArea {
-                    id: textEdit
+                    id: textArea
                     font.pointSize: 11
                     wrapMode: "Wrap"
                 }
@@ -108,7 +114,6 @@ App {
 
             //text filter list
             RowLayout {
-                //issue, alignment not set until screen resize
                 width: root.width
 
                 AppText {
@@ -141,7 +146,6 @@ App {
 
             //font style
             RowLayout {
-                //issue, alignment not set until screen resize
                 width: root.width
 
                 AppText {
@@ -162,7 +166,6 @@ App {
 
             //Color picker for the font
             RowLayout {
-                //issue, alignment not set until screen resize
                 width: root.width
 
                 AppText {
@@ -183,7 +186,6 @@ App {
 
             //background Color
             RowLayout {
-                //issue, alignment not set until screen resize
                 width: root.width
 
                 AppText {
@@ -204,7 +206,6 @@ App {
 
             //Color picker for the font
             RowLayout {
-                //issue, alignment not set until screen resize
                 width: root.width
 
                 AppText {
@@ -226,7 +227,6 @@ App {
 
             //Color picker for the font
             RowLayout {
-                //issue, alignment not set until screen resize
                 width: root.width
 
                 AppText {
@@ -238,11 +238,7 @@ App {
                 ComboBox {
                     id: backgroundShapeComboBox
                     Layout.alignment: Qt.AlignRight
-                    width: 250
                     model: ["Square", "Rectangle", "Circle"]
-                    onStateChanged: {
-                        console.log(backgroundShapeComboBox)
-                    }
                 }
             }
         }
@@ -266,14 +262,14 @@ App {
         //reset and generate word map buttons
         RowLayout {
             Layout.alignment: Qt.AlignVCenter
-            //issue, alignment not set until screen resize
             width: root.width
 
             AppButton {
                 text: qsTr("Reset Settings")
                 Layout.alignment: Qt.AlignLeft
                 onClicked: {
-                    console.log("Reset Settings")
+                    backEnd.resetInputs()
+                    textArea.text = ""
                 }
             }
 
@@ -281,7 +277,13 @@ App {
                 text: qsTr("Generate Wordmap")
                 Layout.alignment: Qt.AlignRight
                 onClicked: {
-                    console.log("Generate Wordmap")
+                    if(backEnd.generateWordMap(textArea.text) <= 0) {
+                        //script has an error, notify the user
+                        wordMapErrorDialog.visible = true
+                    }
+                    else {
+                        wordMapPreviewDialog.visible = true
+                    }
                 }
             }
         }
@@ -298,7 +300,12 @@ App {
             //open file stream and get the contents of the file
             //put the contents of the file into the textarea
             //console.log("Selected File: " + fileDialog.fileUrls)
-            backEnd.fileUrl = fileDialog.fileUrl
+            if(localVariables.settingsType == "Text") {
+                textArea.text = backEnd.textFileContents(fileDialog.fileUrl);
+            }
+            else if(localVariables.settingsType == "Image") {
+                backEnd.backgroundImageUrl = fileDialog.fileUrl
+            }
         }
     }
 
@@ -319,14 +326,12 @@ App {
         visible: false
         onAccepted: {
             //update Color settings
-            //console.log("Selected Color: " + ColorDialog.currentColor + " | Selected Alpha: " + ColorDialog.currentAlpha)
+            //console.log("Selected Color: " + ColorDialog.currentColor)
             if(localVariables.settingsType == "Font") {
                 backEnd.fontColor = colorDialog.currentColor;
-                backEnd.fontAlpha = colorDialog.currentAlpha;
             }
             else if(localVariables.settingsType == "Background") {
                 backEnd.backgroundColor = colorDialog.currentColor;
-                backEnd.backgroundAlpha = colorDialog.currentAlpha;
             }
         }
     }
@@ -340,12 +345,21 @@ App {
         title: qsTr("Edit Text Filter List")
     }
 
-    //work around for the layouts not properly being set on window load
-    Component.onCompleted: {
-        onLoad()
+    //word map error dialog
+    Dialog {
+        height: 100
+        width: 400
+        visible: false
+        id: wordMapErrorDialog
+        title: qsTr("Error Generating Word Map")
     }
 
-    function onLoad() {
-        root.width = root.width +1
+    //word map dialog
+    Dialog {
+        height: 600
+        width: 600
+        visible: false
+        id: wordMapPreviewDialog
+        title: qsTr("Word Map Preview")
     }
 }

@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 
     //registered name must be capitalized ie backEnd doesn't work
     //QML: import WordMap.BackEnd 1.0
-    qmlRegisterType<backEnd>("WordMap.BackEnd", 1, 0, "BackEnd");
+    qmlRegisterType<backEnd>("WordMap.BackEnd", 1, 2, "BackEnd");
 
     VPApplication vplay;
 
