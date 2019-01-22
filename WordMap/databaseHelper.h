@@ -6,6 +6,10 @@
 #include <QtSql/QSqlQuery>
 #include <QSqlError>
 #include <QDebug>
+#include <QVector>
+#include <QPair>
+#include <QString>
+#include <QRegularExpression>
 
 class databaseHelper
 {
@@ -14,18 +18,26 @@ public:
     databaseHelper();
     databaseHelper(bool);
 
-private:
-    void createDatabase(bool);
-
     //select
+    QVector<QPair<QString, int>> selectIgnoreList();
 
     //insert
+    int insertIgnoreWord(const QString &);
 
     //update
+    int updateWordActiveFlag(const QString &, const int &);
 
     //delete
+    int removeIgnoreWord(const QString &);
 
+private:
+    //internal functions
+    void createDatabase(bool);
+    QString removeCharacters(const QString);
+
+    //internal variables
     QSqlDatabase m_database;
+    QSqlQuery m_query;
 };
 
 #endif // DATABASEHELPER_H

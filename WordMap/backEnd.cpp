@@ -6,12 +6,56 @@ backEnd::backEnd(QObject *parent) : QObject(parent)
     //true = drop tables | false = keep existing data
     m_database_helper = databaseHelper(true);
 
+    //debugging, move these into databasehelper
+    m_database_helper.insertIgnoreWord("at");
+    m_database_helper.insertIgnoreWord("to");
+    m_database_helper.insertIgnoreWord("the");
+    m_database_helper.insertIgnoreWord("it");
+    m_database_helper.insertIgnoreWord("and");
+    m_database_helper.insertIgnoreWord("or");
+    m_database_helper.insertIgnoreWord("hello");
+
+    m_database_helper.updateWordActiveFlag("and", 0);
+    m_database_helper.removeIgnoreWord("hello");
+
+    for (QPair<QString, int> pair : m_database_helper.selectIgnoreList())
+    {
+        qDebug() << "Word: " << pair.first << " Active Flag: " << pair.second;
+    }
+
     //default formatting values
     resetInputs();
+
+    //are the same entries that appear in QML, looking at potentially linking the two
+    m_background_shapes_list.append("Square");
+    m_background_shapes_list.append("Rectangle");
+    m_background_shapes_list.append("Circle");
+    m_background_shapes_list.append("Triangle");
 }
 
 //PUBLIC FUNCTIONS
 //Q_PROPERTY
+//getter methods
+QFont backEnd::fontStyle()
+{
+    return m_font_style;
+}
+
+QColor backEnd::fontColor()
+{
+    return m_font_color;
+}
+
+QColor backEnd::backgroundColor()
+{
+    return m_background_color;
+}
+
+QUrl backEnd::backgroundImageUrl()
+{
+    return m_background_image_url;
+}
+
 //setter methods
 void backEnd::setFontStyle(const QFont &font)
 {
@@ -37,28 +81,14 @@ void backEnd::setBackgroundImageUrl(const QUrl &url)
     qDebug() << "Background Image Url: " << m_background_image_url;
 }
 
-//getter methods
-QFont backEnd::fontStyle()
-{
-    return m_font_style;
-}
-
-QColor backEnd::fontColor()
-{
-    return m_font_color;
-}
-
-QColor backEnd::backgroundColor()
-{
-    return m_background_color;
-}
-
-QUrl backEnd::backgroundImageUrl()
-{
-    return m_background_image_url;
-}
 
 //Q_INVOKABLE
+void backEnd::backgroundShape(const int &index)
+{
+    m_background_shape = m_background_shapes_list.at(index);
+    qDebug() << "Background Shape: " << m_background_shape;
+}
+
 //given a URL for a text file, this function will extract the contents of it and store
 //it in a QString variable that it will return.
 QString backEnd::textFileContents(const QUrl &url)
@@ -97,6 +127,7 @@ void backEnd::resetInputs()
     m_font_color = QColor(0, 0, 0, 1);//black
     m_background_color = QColor(1, 1, 1, 1);//white
     m_background_image_url = QUrl();
+    m_background_shape = "Square";
     m_word_list.clear();
     m_word_list_ordered.clear();
 
@@ -104,6 +135,7 @@ void backEnd::resetInputs()
     qDebug() << "Font Style: " << m_font_style;
     qDebug() << "Font Color: " << m_font_color;
     qDebug() << "Background Color: " << m_background_color;
+    qDebug() << "Background Shape: " << m_background_shape;
 }
 
 //public function that the frontend will call to generate the wordmap. If all inputs
@@ -130,7 +162,7 @@ int backEnd::generateWordMap(QString text)
     }
     else {
         qDebug() << "[ERROR] Not all inputs have values";
-        return -1;
+        return 0;
     }
 }
 

@@ -21,6 +21,7 @@ class backEnd : public QObject
     //Q_OBJECT allows for communication between C++ and QML
     Q_OBJECT
 public:
+    Q_INVOKABLE void backgroundShape(const int &);
     Q_INVOKABLE QString textFileContents(const QUrl &);
     Q_INVOKABLE void resetInputs();
     Q_INVOKABLE int generateWordMap(QString);
@@ -58,6 +59,9 @@ private:
     QColor m_font_color;
     QColor m_background_color;
     QUrl m_background_image_url;
+    QString m_background_shape;
+
+    QVector<QString> m_background_shapes_list;
 
     //non ordered list of words and their frequencies
     QHash<QString, int> m_word_list;

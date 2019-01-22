@@ -238,7 +238,11 @@ App {
                 ComboBox {
                     id: backgroundShapeComboBox
                     Layout.alignment: Qt.AlignRight
-                    model: ["Square", "Rectangle", "Circle"]
+                    model: ["Square", "Rectangle", "Circle", "Triangle"]
+                    onCurrentIndexChanged: {
+                        //console.log(backgroundShapeComboBox.currentIndex)
+                        backEnd.backgroundShape(backgroundShapeComboBox.currentIndex)
+                    }
                 }
             }
         }
@@ -277,7 +281,7 @@ App {
                 text: qsTr("Generate Wordmap")
                 Layout.alignment: Qt.AlignRight
                 onClicked: {
-                    if(backEnd.generateWordMap(textArea.text) <= 0) {
+                    if(backEnd.generateWordMap(textArea.text) === 0) {
                         //script has an error, notify the user
                         wordMapErrorDialog.visible = true
                     }
