@@ -347,15 +347,24 @@ App {
         visible: false
         id: textFilterDialog
         title: qsTr("Edit Text Filter List")
+
+        standardButtons: StandardButton.Close
     }
 
     //word map error dialog
     Dialog {
-        height: 100
-        width: 400
         visible: false
         id: wordMapErrorDialog
         title: qsTr("Error Generating Word Map")
+
+        RowLayout {
+            Image {
+                source: "../assets/icons8-cancel-50.svg"
+            }
+            AppText {
+                text: "Source text has not been filled out"
+            }
+        }
     }
 
     //word map dialog
