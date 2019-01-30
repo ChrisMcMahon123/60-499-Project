@@ -109,6 +109,7 @@ App {
                     id: textArea
                     font.pointSize: 11
                     wrapMode: "Wrap"
+                    selectByMouse: true
                 }
             }
 
@@ -240,7 +241,6 @@ App {
                     Layout.alignment: Qt.AlignRight
                     model: ["Square", "Rectangle", "Circle", "Triangle"]
                     onCurrentIndexChanged: {
-                        //console.log(backgroundShapeComboBox.currentIndex)
                         backEnd.backgroundShape(backgroundShapeComboBox.currentIndex)
                     }
                 }
@@ -342,13 +342,123 @@ App {
 
     //text filter dialog to add and remove entries
     Dialog {
-        height: 500
-        width: 400
+        width: 450
         visible: false
         id: textFilterDialog
         title: qsTr("Edit Text Filter List")
 
-        standardButtons: StandardButton.Close
+        contentItem: ColumnLayout {
+            anchors.fill: parent
+
+            Rectangle {
+                height: 400
+                width: textFilterDialog.width
+
+                ListView {
+                    anchors.fill: parent
+                    clip: true
+
+                    model: ListModel {
+                        ListElement {
+                            word: "hello"
+                            value: false
+                        }
+
+                        ListElement {
+                            word: "world"
+                            value: false
+                        }
+
+                        ListElement {
+                            word: "and"
+                            value: false
+                        }
+                        ListElement {
+                            word: "and"
+                            value: false
+                        }
+                        ListElement {
+                            word: "and"
+                            value: false
+                        }
+                        ListElement {
+                            word: "and"
+                            value: false
+                        }
+                        ListElement {
+                            word: "and"
+                            value: false
+                        }
+                        ListElement {
+                            word: "and"
+                            value: false
+                        }
+                    }
+
+                    delegate: RowLayout {
+                        width: parent.width
+
+                        CheckBox {
+                            checked: model.value
+                        }
+
+                        Rectangle {
+                            color:"lightgrey"
+                            width: 250
+                            height: 45
+                            clip: true
+
+                            AppTextEdit {
+                                Layout.leftMargin: 15
+                                height: parent.height
+                                width: parent.width
+                                text: model.word
+                                selectByMouse: true
+                            }
+                        }
+
+                        AppButton {
+                            Layout.alignment: Qt.AlignRight
+                            backgroundColor: "Red"
+                            text: qsTr("Remove")
+                        }
+                    }
+                }
+            }
+
+            //divider
+            Rectangle {
+                height: 1
+                width: textFilterDialog.width
+                color: "black"
+            }
+
+            RowLayout {
+                width: textFilterDialog.width
+
+                Rectangle {
+                    color: "lightgrey"
+                    width: 290
+                    height: 45
+                    clip: true
+                    Layout.leftMargin: 10
+                    Layout.alignment: Qt.AlignLeft
+
+                    AppTextEdit {
+                        height: parent.height
+                        width: parent.width
+                        placeholderText: qsTr("Ignore Word")
+                        selectByMouse: true
+                    }
+                }
+
+                AppButton {
+                    Layout.alignment: Qt.AlignRight
+                    text: qsTr("Add Word")
+                }
+            }
+
+        }
     }
 
     //word map error dialog
