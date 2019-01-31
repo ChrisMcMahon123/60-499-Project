@@ -11,12 +11,12 @@
 #include <QString>
 #include <QRegularExpression>
 
-class databaseHelper
+class DatabaseHelper
 {
 public:
     //constructors
-    databaseHelper();
-    databaseHelper(bool);
+    DatabaseHelper();
+    DatabaseHelper(bool);
 
     //select
     QVector<QPair<QString, int>> selectIgnoreList();

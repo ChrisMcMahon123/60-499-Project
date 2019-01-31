@@ -14,9 +14,7 @@
 #include <QFile>
 #include <QRegularExpression>
 
-#include "databaseHelper.h"
-
-class backEnd : public QObject
+class BackEnd : public QObject
 {
     //Q_OBJECT allows for communication between C++ and QML
     Q_OBJECT
@@ -33,7 +31,7 @@ public:
     Q_PROPERTY(QUrl backgroundImageUrl READ backgroundImageUrl WRITE setBackgroundImageUrl)
 
     //constructor
-    explicit backEnd(QObject *parent = nullptr);
+    explicit BackEnd(QObject *parent = nullptr);
 
     //getter methods
     QFont fontStyle();
@@ -68,8 +66,6 @@ private:
 
     //ordered from most occuring to least occuring
     QVector<QPair<int, QString>> m_word_list_ordered;
-
-    databaseHelper m_database_helper;
 };
 
 #endif // BACKEND_H

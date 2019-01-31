@@ -1,9 +1,11 @@
 #include <QApplication>
 #include <VPApplication>
-
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 
 #include "backEnd.h"
+#include "todolist.h"
+#include "todomodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,9 +13,13 @@ int main(int argc, char *argv[])
 
     //registered name must be capitalized ie backEnd doesn't work
     //QML: import WordMap.BackEnd 1.0
-    qmlRegisterType<backEnd>("WordMap.BackEnd", 1, 2, "BackEnd");
+    qmlRegisterType<BackEnd>("BackEnd", 1, 2, "BackEnd");
+    qmlRegisterType<ToDoModel>("ToDoModel", 1, 0, "ToDoModel");
+    qmlRegisterUncreatableType<ToDoList>("ToDo", 1, 0, "ToDoList",QStringLiteral("IgnoreList should not be created in QML"));
 
     VPApplication vplay;
+
+    ToDoList toDoList;
 
     // Use platform-specific fonts instead of V-Play's default font
     vplay.setPreservePlatformFonts(true);
@@ -30,7 +36,7 @@ int main(int argc, char *argv[])
     // to avoid deployment of your qml files and images, also comment the DEPLOYMENTFOLDERS command in the .pro file
     // also see the .pro file for more details
     // vplay.setMainQmlFileName(QStringLiteral("qrc:/qml/Main.qml"));
-
+    engine.rootContext()->setContextProperty(QStringLiteral("toDoList"), &toDoList);
     engine.load(QUrl(vplay.mainQmlFileName()));
 
     return app.exec();

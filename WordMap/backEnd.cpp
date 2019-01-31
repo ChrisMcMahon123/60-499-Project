@@ -1,28 +1,8 @@
 #include "backEnd.h"
 
 //constructor
-backEnd::backEnd(QObject *parent) : QObject(parent)
+BackEnd::BackEnd(QObject *parent) : QObject(parent)
 {
-    //true = drop tables | false = keep existing data
-    m_database_helper = databaseHelper(true);
-
-    //debugging, move these into databasehelper
-    m_database_helper.insertIgnoreWord("at");
-    m_database_helper.insertIgnoreWord("to");
-    m_database_helper.insertIgnoreWord("the");
-    m_database_helper.insertIgnoreWord("it");
-    m_database_helper.insertIgnoreWord("and");
-    m_database_helper.insertIgnoreWord("or");
-    m_database_helper.insertIgnoreWord("hello");
-
-    m_database_helper.updateWordActiveFlag("and", 0);
-    m_database_helper.removeIgnoreWord("hello");
-
-    for (QPair<QString, int> pair : m_database_helper.selectIgnoreList())
-    {
-        qDebug() << "Word: " << pair.first << " Active Flag: " << pair.second;
-    }
-
     //default formatting values
     resetInputs();
 
@@ -36,46 +16,46 @@ backEnd::backEnd(QObject *parent) : QObject(parent)
 //PUBLIC FUNCTIONS
 //Q_PROPERTY
 //getter methods
-QFont backEnd::fontStyle()
+QFont BackEnd::fontStyle()
 {
     return m_font_style;
 }
 
-QColor backEnd::fontColor()
+QColor BackEnd::fontColor()
 {
     return m_font_color;
 }
 
-QColor backEnd::backgroundColor()
+QColor BackEnd::backgroundColor()
 {
     return m_background_color;
 }
 
-QUrl backEnd::backgroundImageUrl()
+QUrl BackEnd::backgroundImageUrl()
 {
     return m_background_image_url;
 }
 
 //setter methods
-void backEnd::setFontStyle(const QFont &font)
+void BackEnd::setFontStyle(const QFont &font)
 {
     m_font_style = font;
     qDebug() << "Font Style: " << m_font_style;
 }
 
-void backEnd::setFontColor(const QColor &color)
+void BackEnd::setFontColor(const QColor &color)
 {
     m_font_color = color;
     qDebug() << "Font Color: " << m_font_color;
 }
 
-void backEnd::setBackgroundColor(const QColor &color)
+void BackEnd::setBackgroundColor(const QColor &color)
 {
     m_background_color = color;
     qDebug() << "Background Color: " << m_background_color;
 }
 
-void backEnd::setBackgroundImageUrl(const QUrl &url)
+void BackEnd::setBackgroundImageUrl(const QUrl &url)
 {
     m_background_image_url = url;
     qDebug() << "Background Image Url: " << m_background_image_url;
@@ -83,7 +63,7 @@ void backEnd::setBackgroundImageUrl(const QUrl &url)
 
 
 //Q_INVOKABLE
-void backEnd::backgroundShape(const int &index)
+void BackEnd::backgroundShape(const int &index)
 {
     m_background_shape = m_background_shapes_list.at(index);
     qDebug() << "Background Shape: " << m_background_shape;
@@ -91,7 +71,7 @@ void backEnd::backgroundShape(const int &index)
 
 //given a URL for a text file, this function will extract the contents of it and store
 //it in a QString variable that it will return.
-QString backEnd::textFileContents(const QUrl &url)
+QString BackEnd::textFileContents(const QUrl &url)
 {
     QFile file(url.path());
 
@@ -120,7 +100,7 @@ QString backEnd::textFileContents(const QUrl &url)
 
 //will set all user input variables to their default values. All changes the user
 //has made will be lost when this function is called.
-void backEnd::resetInputs()
+void BackEnd::resetInputs()
 {
     //set variables to their default format values
     m_font_style = QFont("Sans Serif,9,-1,5,50,0,0,0,0,0");//sans serif, 9 font size
@@ -140,7 +120,7 @@ void backEnd::resetInputs()
 
 //public function that the frontend will call to generate the wordmap. If all inputs
 //are valid, the word map dialog will open (1), else an error dialog will be shown (-1)
-int backEnd::generateWordMap(QString text)
+int BackEnd::generateWordMap(QString text)
 {
     //check to ensure all variables are set
     if(text != "") {
@@ -169,7 +149,7 @@ int backEnd::generateWordMap(QString text)
 //PRIVATE FUNCTIONS
 //will return a hashmap that represents the frequency of each word that appears in the text. All
 //punctiation is ignored and newlines. Also words on the ignore list will be filtered out ****
-QHash<QString, int> backEnd::wordList(QString &text)
+QHash<QString, int> BackEnd::wordList(QString &text)
 {
     QHash<QString, int> hash;
     //remove everything except for letters
@@ -201,7 +181,7 @@ QHash<QString, int> backEnd::wordList(QString &text)
 
 //given the hashmap words and their frequency, this function will swap the key and values and
 //put them into a vector that will be sorted ascending (least to greatest)
-QVector<QPair<int, QString>> backEnd::wordListOrdered(const QHash<QString, int> &hash)
+QVector<QPair<int, QString>> BackEnd::wordListOrdered(const QHash<QString, int> &hash)
 {
     QVector<QPair<int, QString>> vector;
     QHashIterator<QString, int> iterator(hash);

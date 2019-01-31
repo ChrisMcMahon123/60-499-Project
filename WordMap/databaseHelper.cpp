@@ -1,12 +1,12 @@
 #include "databaseHelper.h"
 
 //constructors
-databaseHelper::databaseHelper()
+DatabaseHelper::DatabaseHelper()
 {
 
 }
 
-databaseHelper::databaseHelper(bool flag)
+DatabaseHelper::DatabaseHelper(bool flag)
 {
     m_database = QSqlDatabase::addDatabase("QSQLITE");
     m_database.setDatabaseName("ignoreList.db");
@@ -18,7 +18,7 @@ databaseHelper::databaseHelper(bool flag)
 }
 
 //PUBLIC FUNCTIONS
-QVector<QPair<QString, int>> databaseHelper::selectIgnoreList()
+QVector<QPair<QString, int>> DatabaseHelper::selectIgnoreList()
 {
     QVector<QPair<QString, int>> ignoreList;
 
@@ -44,7 +44,7 @@ QVector<QPair<QString, int>> databaseHelper::selectIgnoreList()
     return ignoreList;
 }
 
-int databaseHelper::insertIgnoreWord(const QString &string)
+int DatabaseHelper::insertIgnoreWord(const QString &string)
 {
     QString word = removeCharacters(string);
 
@@ -65,7 +65,7 @@ int databaseHelper::insertIgnoreWord(const QString &string)
     }
 }
 
-int databaseHelper::updateWordActiveFlag(const QString &string, const int &flag)
+int DatabaseHelper::updateWordActiveFlag(const QString &string, const int &flag)
 {
     QString word = removeCharacters(string);
 
@@ -87,7 +87,7 @@ int databaseHelper::updateWordActiveFlag(const QString &string, const int &flag)
     }
 }
 
-int databaseHelper::removeIgnoreWord(const QString &string)
+int DatabaseHelper::removeIgnoreWord(const QString &string)
 {
     QString word = removeCharacters(string);
 
@@ -110,7 +110,7 @@ int databaseHelper::removeIgnoreWord(const QString &string)
 
 //PRIVATE FUNCTIONS
 //create the IgnoreList table, will output an error if the table is already present (OK)
-void databaseHelper::createDatabase(bool flag)
+void DatabaseHelper::createDatabase(bool flag)
 {
     /*
      * flag == true
@@ -147,7 +147,7 @@ void databaseHelper::createDatabase(bool flag)
 
 //this function will remove everything except letters from a given string and then return it.
 //will also convert to lower case.
-QString databaseHelper::removeCharacters(const QString string)
+QString DatabaseHelper::removeCharacters(const QString string)
 {
     QString word = string;
     word = word.replace("\n", "");

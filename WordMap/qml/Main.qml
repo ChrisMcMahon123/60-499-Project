@@ -6,7 +6,8 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.3
 
 //library name comes from main.cpp
-import WordMap.BackEnd 1.2
+import BackEnd 1.2
+import ToDoModel 1.0
 
 App {
     id: root
@@ -127,7 +128,7 @@ App {
                     text: qsTr("Edit List")
                     Layout.alignment: Qt.AlignRight
                     onClicked: {
-                        textFilterDialog.visible = true
+                        ignoreListDialog.visible = true
                     }
                 }
             }
@@ -340,66 +341,34 @@ App {
         }
     }
 
-    //text filter dialog to add and remove entries
+    //ignore list dialog to add and remove entries
     Dialog {
         width: 450
         visible: false
-        id: textFilterDialog
-        title: qsTr("Edit Text Filter List")
+        id: ignoreListDialog
+        title: qsTr("Edit Ignore List Dialog")
 
         contentItem: ColumnLayout {
             anchors.fill: parent
 
             Rectangle {
                 height: 400
-                width: textFilterDialog.width
+                width: ignoreListDialog.width
 
                 ListView {
                     anchors.fill: parent
                     clip: true
 
-                    model: ListModel {
-                        ListElement {
-                            word: "hello"
-                            value: false
-                        }
-
-                        ListElement {
-                            word: "world"
-                            value: false
-                        }
-
-                        ListElement {
-                            word: "and"
-                            value: false
-                        }
-                        ListElement {
-                            word: "and"
-                            value: false
-                        }
-                        ListElement {
-                            word: "and"
-                            value: false
-                        }
-                        ListElement {
-                            word: "and"
-                            value: false
-                        }
-                        ListElement {
-                            word: "and"
-                            value: false
-                        }
-                        ListElement {
-                            word: "and"
-                            value: false
-                        }
+                    model: ToDoModel {
+                        list: toDoList
                     }
 
                     delegate: RowLayout {
                         width: parent.width
 
                         CheckBox {
-                            checked: model.value
+                            checked: model.done
+                            onClicked: model.done = checked
                         }
 
                         Rectangle {
@@ -412,7 +381,8 @@ App {
                                 Layout.leftMargin: 15
                                 height: parent.height
                                 width: parent.width
-                                text: model.word
+                                text: model.description
+                                onEditingFinished: model.description = text
                                 selectByMouse: true
                             }
                         }
@@ -421,6 +391,9 @@ App {
                             Layout.alignment: Qt.AlignRight
                             backgroundColor: "Red"
                             text: qsTr("Remove")
+                            onClicked: {
+                                console.log("Remove Word: " + model.description)
+                            }
                         }
                     }
                 }
@@ -429,12 +402,12 @@ App {
             //divider
             Rectangle {
                 height: 1
-                width: textFilterDialog.width
+                width: ignoreListDialog.width
                 color: "black"
             }
 
             RowLayout {
-                width: textFilterDialog.width
+                width: ignoreListDialog.width
 
                 Rectangle {
                     color: "lightgrey"
@@ -445,6 +418,7 @@ App {
                     Layout.alignment: Qt.AlignLeft
 
                     AppTextEdit {
+                        id: ignoreWord
                         height: parent.height
                         width: parent.width
                         placeholderText: qsTr("Ignore Word")
@@ -455,9 +429,22 @@ App {
                 AppButton {
                     Layout.alignment: Qt.AlignRight
                     text: qsTr("Add Word")
+                    onClicked: {
+                        toDoList.appendItem()
+                        console.log("Add Word to Ignore List")
+                    }
                 }
             }
 
+            DialogButtonBox {
+                Layout.alignment: Qt.AlignRight
+
+                standardButtons: Dialog.Close
+
+                onRejected: {
+                    ignoreListDialog.visible = false
+                }
+            }
         }
     }
 
@@ -467,12 +454,24 @@ App {
         id: wordMapErrorDialog
         title: qsTr("Error Generating Word Map")
 
-        RowLayout {
-            Image {
-                source: "../assets/icons8-cancel-50.svg"
+        contentItem: ColumnLayout {
+            RowLayout {
+                Image {
+                    source: "../assets/icons8-cancel-50.svg"
+                }
+                AppText {
+                    text: "Source text has not been filled out"
+                }
             }
-            AppText {
-                text: "Source text has not been filled out"
+
+            DialogButtonBox {
+                Layout.alignment: Qt.AlignRight
+
+                standardButtons: Dialog.Close
+
+                onRejected: {
+                    wordMapErrorDialog.visible = false
+                }
             }
         }
     }

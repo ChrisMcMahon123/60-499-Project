@@ -32,7 +32,9 @@ RESOURCES += #    resources.qrc # uncomment for publishing
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
     backEnd.cpp \
-    databaseHelper.cpp
+    databaseHelper.cpp \
+    todolist.cpp \
+    todomodel.cpp
 
 android {
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
@@ -55,4 +57,6 @@ macx {
 
 HEADERS += \
     backEnd.h \
-    databaseHelper.h
+    databaseHelper.h \
+    todolist.h \
+    todomodel.h
