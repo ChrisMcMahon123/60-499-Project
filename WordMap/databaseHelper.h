@@ -19,13 +19,13 @@ public:
     DatabaseHelper(bool);
 
     //select
-    QVector<QPair<QString, int>> selectIgnoreList();
+    QVector<QPair<QString, bool>> selectIgnoreList();
 
     //insert
     int insertIgnoreWord(const QString &);
 
     //update
-    int updateWordActiveFlag(const QString &, const int &);
+    int updateWordActiveFlag(const QString &, const bool &);
 
     //delete
     int removeIgnoreWord(const QString &);

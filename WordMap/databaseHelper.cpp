@@ -18,9 +18,9 @@ DatabaseHelper::DatabaseHelper(bool flag)
 }
 
 //PUBLIC FUNCTIONS
-QVector<QPair<QString, int>> DatabaseHelper::selectIgnoreList()
+QVector<QPair<QString, bool>> DatabaseHelper::selectIgnoreList()
 {
-    QVector<QPair<QString, int>> ignoreList;
+    QVector<QPair<QString, bool>> ignoreList;
 
     if(m_query.exec("SELECT * FROM IgnoreList"))
     {
@@ -35,7 +35,7 @@ QVector<QPair<QString, int>> DatabaseHelper::selectIgnoreList()
 
     do
     {
-        ignoreList.append(QPair<QString, int>(m_query.value(0).toString(), m_query.value(1).toInt()));
+        ignoreList.append(QPair<QString, bool>(m_query.value(0).toString(), m_query.value(1).toBool()));
     }
     while(m_query.next());
 
@@ -65,7 +65,7 @@ int DatabaseHelper::insertIgnoreWord(const QString &string)
     }
 }
 
-int DatabaseHelper::updateWordActiveFlag(const QString &string, const int &flag)
+int DatabaseHelper::updateWordActiveFlag(const QString &string, const bool &flag)
 {
     QString word = removeCharacters(string);
 
@@ -136,6 +136,17 @@ void DatabaseHelper::createDatabase(bool flag)
     if(m_query.exec("CREATE TABLE IgnoreList (word TEXT NOT NULL PRIMARY KEY, active_flag INTEGER NOT NULL)"))
     {
         qDebug() << "IgnoreList Created";
+
+        //add some default words to ignore
+        insertIgnoreWord("and");
+        insertIgnoreWord("to");
+        insertIgnoreWord("the");
+        insertIgnoreWord("it");
+        insertIgnoreWord("or");
+        insertIgnoreWord("is");
+
+        //debug
+        updateWordActiveFlag("and", false);
     }
     else
     {

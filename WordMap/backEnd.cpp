@@ -120,7 +120,7 @@ void BackEnd::resetInputs()
 
 //public function that the frontend will call to generate the wordmap. If all inputs
 //are valid, the word map dialog will open (1), else an error dialog will be shown (-1)
-int BackEnd::generateWordMap(QString text)
+QString BackEnd::generateWordMap(QString text)
 {
     //check to ensure all variables are set
     if(text != "") {
@@ -138,11 +138,11 @@ int BackEnd::generateWordMap(QString text)
         qDebug() << "Font Color: " << m_font_color;
         qDebug() << "Background Color: " << m_background_color;
 
-        return 1;
+        return "";
     }
     else {
         qDebug() << "[ERROR] Not all inputs have values";
-        return 0;
+        return "Not all inputs have values";
     }
 }
 

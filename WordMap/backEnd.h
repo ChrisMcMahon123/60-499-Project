@@ -22,7 +22,7 @@ public:
     Q_INVOKABLE void backgroundShape(const int &);
     Q_INVOKABLE QString textFileContents(const QUrl &);
     Q_INVOKABLE void resetInputs();
-    Q_INVOKABLE int generateWordMap(QString);
+    Q_INVOKABLE QString generateWordMap(QString);
 
     //getter and setter functions are required
     Q_PROPERTY(QFont fontStyle READ fontStyle WRITE setFontStyle)

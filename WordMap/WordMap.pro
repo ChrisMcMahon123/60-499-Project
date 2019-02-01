@@ -33,8 +33,8 @@ RESOURCES += #    resources.qrc # uncomment for publishing
 SOURCES += main.cpp \
     backEnd.cpp \
     databaseHelper.cpp \
-    todolist.cpp \
-    todomodel.cpp
+    ignoreModel.cpp \
+    ignoreList.cpp
 
 android {
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
@@ -58,5 +58,5 @@ macx {
 HEADERS += \
     backEnd.h \
     databaseHelper.h \
-    todolist.h \
-    todomodel.h
+    ignoreModel.h \
+    ignoreList.h

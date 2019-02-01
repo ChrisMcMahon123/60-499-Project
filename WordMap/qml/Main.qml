@@ -7,7 +7,7 @@ import QtQuick.Window 2.3
 
 //library name comes from main.cpp
 import BackEnd 1.2
-import ToDoModel 1.0
+import IgnoreModel 1.0
 
 App {
     id: root
@@ -28,7 +28,8 @@ App {
         id: localVariables
         property string settingsType: ""
         property string fileFilter: ""
-        property int scriptStatus: 0
+        property string errorTitle: ""
+        property string errorMessage: ""
     }
 
     BackEnd {
@@ -77,7 +78,7 @@ App {
                     onClicked: {
                         localVariables.fileFilter = "Text Files (*.txt)"
                         localVariables.settingsType = "Text"
-                        fileDialog.visible = true
+                        fileOpenDialog.visible = true
                     }
                 }
             }
@@ -222,7 +223,7 @@ App {
                     onClicked: {
                         localVariables.fileFilter = "Image Files (*.jpg *.png)"
                         localVariables.settingsType = "Image"
-                        fileDialog.visible = true
+                        fileOpenDialog.visible = true
                     }
                 }
             }
@@ -282,8 +283,10 @@ App {
                 text: qsTr("Generate Wordmap")
                 Layout.alignment: Qt.AlignRight
                 onClicked: {
-                    if(backEnd.generateWordMap(textArea.text) === 0) {
-                        //script has an error, notify the user
+                    localVariables.errorMessage = qsTr(backEnd.generateWordMap(textArea.text))
+
+                    if(localVariables.errorMessage !== "") {
+                        localVariables.errorTitle = qsTr("Error Generating Word Map")
                         wordMapErrorDialog.visible = true
                     }
                     else {
@@ -296,7 +299,7 @@ App {
 
     //file dialog for selecting text files
     FileDialog {
-        id: fileDialog
+        id: fileOpenDialog
         title: qsTr("Select " + localVariables.settingsType + " File")
         folder: shortcuts.home
         nameFilters: localVariables.fileFilter
@@ -304,12 +307,12 @@ App {
         onAccepted: {
             //open file stream and get the contents of the file
             //put the contents of the file into the textarea
-            //console.log("Selected File: " + fileDialog.fileUrls)
+            //console.log("Selected File: " + fileOpenDialog.fileUrls)
             if(localVariables.settingsType == "Text") {
-                textArea.text = backEnd.textFileContents(fileDialog.fileUrl);
+                textArea.text = backEnd.textFileContents(fileOpenDialog.fileUrl);
             }
             else if(localVariables.settingsType == "Image") {
-                backEnd.backgroundImageUrl = fileDialog.fileUrl
+                backEnd.backgroundImageUrl = fileOpenDialog.fileUrl
             }
         }
     }
@@ -359,20 +362,19 @@ App {
                     anchors.fill: parent
                     clip: true
 
-                    model: ToDoModel {
-                        list: toDoList
+                    model: IgnoreModel {
+                        list: ignoreList
                     }
 
                     delegate: RowLayout {
                         width: parent.width
 
                         CheckBox {
-                            checked: model.done
-                            onClicked: model.done = checked
+                            checked: model.active
+                            onClicked: model.active = checked
                         }
 
                         Rectangle {
-                            color:"lightgrey"
                             width: 250
                             height: 45
                             clip: true
@@ -381,9 +383,10 @@ App {
                                 Layout.leftMargin: 15
                                 height: parent.height
                                 width: parent.width
-                                text: model.description
-                                onEditingFinished: model.description = text
+                                text: model.word
+                                onEditingFinished: model.word = text
                                 selectByMouse: true
+                                readOnly: true
                             }
                         }
 
@@ -392,7 +395,8 @@ App {
                             backgroundColor: "Red"
                             text: qsTr("Remove")
                             onClicked: {
-                                console.log("Remove Word: " + model.description)
+                                ignoreList.removeItem(model.word)
+                                console.log("Remove Word: " + model.word)
                             }
                         }
                     }
@@ -421,7 +425,6 @@ App {
                         id: ignoreWord
                         height: parent.height
                         width: parent.width
-                        placeholderText: qsTr("Ignore Word")
                         selectByMouse: true
                     }
                 }
@@ -430,8 +433,14 @@ App {
                     Layout.alignment: Qt.AlignRight
                     text: qsTr("Add Word")
                     onClicked: {
-                        toDoList.appendItem()
-                        console.log("Add Word to Ignore List")
+                        localVariables.errorMessage = qsTr(ignoreList.appendItem(ignoreWord.text))
+
+                        if(localVariables.errorMessage !== "") {
+                            localVariables.errorTitle = qsTr("Error Inserting Word")
+                            wordMapErrorDialog.visible = true
+                        }
+
+                        ignoreWord.text = ""
                     }
                 }
             }
@@ -452,7 +461,8 @@ App {
     Dialog {
         visible: false
         id: wordMapErrorDialog
-        title: qsTr("Error Generating Word Map")
+        title: localVariables.errorTitle
+        width: 450
 
         contentItem: ColumnLayout {
             RowLayout {
@@ -460,7 +470,7 @@ App {
                     source: "../assets/icons8-cancel-50.svg"
                 }
                 AppText {
-                    text: "Source text has not been filled out"
+                    text: localVariables.errorMessage
                 }
             }
 
@@ -483,5 +493,23 @@ App {
         visible: false
         id: wordMapPreviewDialog
         title: qsTr("Word Map Preview")
+
+        contentItem: ColumnLayout {
+            anchors.fill: parent
+
+            DialogButtonBox {
+                Layout.alignment: Qt.AlignRight | Qt.AlignBottom
+
+                standardButtons: Dialog.Save | Dialog.Close
+
+                onRejected: {
+                    wordMapPreviewDialog.visible = false
+                }
+
+                onAccepted: {
+                    console.log("Save Word Map")
+                }
+            }
+        }
     }
 }
