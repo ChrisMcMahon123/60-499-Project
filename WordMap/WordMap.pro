@@ -34,7 +34,8 @@ SOURCES += main.cpp \
     backEnd.cpp \
     databaseHelper.cpp \
     ignoreModel.cpp \
-    ignoreList.cpp
+    ignoreList.cpp \
+    wordMap.cpp
 
 android {
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
@@ -59,4 +60,5 @@ HEADERS += \
     backEnd.h \
     databaseHelper.h \
     ignoreModel.h \
-    ignoreList.h
+    ignoreList.h \
+    wordMap.h

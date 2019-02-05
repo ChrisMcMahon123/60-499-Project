@@ -129,6 +129,7 @@ App {
                     text: qsTr("Edit List")
                     Layout.alignment: Qt.AlignRight
                     onClicked: {
+                        ignoreList.openConnection()
                         ignoreListDialog.visible = true
                     }
                 }
@@ -290,7 +291,7 @@ App {
                         wordMapErrorDialog.visible = true
                     }
                     else {
-                        wordMapPreviewDialog.visible = true
+                        //C++ will display a Qt Widget, so do nothing here
                     }
                 }
             }
@@ -451,6 +452,7 @@ App {
                 standardButtons: Dialog.Close
 
                 onRejected: {
+                    ignoreList.closeConnection()
                     ignoreListDialog.visible = false
                 }
             }
@@ -481,33 +483,6 @@ App {
 
                 onRejected: {
                     wordMapErrorDialog.visible = false
-                }
-            }
-        }
-    }
-
-    //word map dialog
-    Dialog {
-        height: 600
-        width: 600
-        visible: false
-        id: wordMapPreviewDialog
-        title: qsTr("Word Map Preview")
-
-        contentItem: ColumnLayout {
-            anchors.fill: parent
-
-            DialogButtonBox {
-                Layout.alignment: Qt.AlignRight | Qt.AlignBottom
-
-                standardButtons: Dialog.Save | Dialog.Close
-
-                onRejected: {
-                    wordMapPreviewDialog.visible = false
-                }
-
-                onAccepted: {
-                    console.log("Save Word Map")
                 }
             }
         }

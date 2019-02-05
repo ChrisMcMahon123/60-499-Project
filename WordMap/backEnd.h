@@ -14,9 +14,11 @@
 #include <QFile>
 #include <QRegularExpression>
 
+#include "databaseHelper.h"
+#include "wordMap.h"
+
 class BackEnd : public QObject
 {
-    //Q_OBJECT allows for communication between C++ and QML
     Q_OBJECT
 public:
     Q_INVOKABLE void backgroundShape(const int &);
@@ -24,22 +26,18 @@ public:
     Q_INVOKABLE void resetInputs();
     Q_INVOKABLE QString generateWordMap(QString);
 
-    //getter and setter functions are required
     Q_PROPERTY(QFont fontStyle READ fontStyle WRITE setFontStyle)
     Q_PROPERTY(QColor fontColor READ fontColor WRITE setFontColor)
     Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
     Q_PROPERTY(QUrl backgroundImageUrl READ backgroundImageUrl WRITE setBackgroundImageUrl)
 
-    //constructor
     explicit BackEnd(QObject *parent = nullptr);
 
-    //getter methods
     QFont fontStyle();
     QColor fontColor();
     QColor backgroundColor();
     QUrl backgroundImageUrl();
 
-    //setter methods
     void setFontStyle(const QFont &);
     void setFontColor(const QColor &);
     void setBackgroundColor(const QColor &);
@@ -48,11 +46,9 @@ public:
 signals:
 
 private:
-    //internal functions
     QHash<QString, int> wordList(QString &);
     QVector<QPair<int, QString>> wordListOrdered(const QHash<QString, int> &);
 
-    //internal variables
     QFont m_font_style;
     QColor m_font_color;
     QColor m_background_color;
@@ -66,6 +62,8 @@ private:
 
     //ordered from most occuring to least occuring
     QVector<QPair<int, QString>> m_word_list_ordered;
+
+    DatabaseHelper m_database;
 };
 
 #endif // BACKEND_H

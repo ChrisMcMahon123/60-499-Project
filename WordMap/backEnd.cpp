@@ -15,7 +15,6 @@ BackEnd::BackEnd(QObject *parent) : QObject(parent)
 
 //PUBLIC FUNCTIONS
 //Q_PROPERTY
-//getter methods
 QFont BackEnd::fontStyle()
 {
     return m_font_style;
@@ -36,7 +35,6 @@ QUrl BackEnd::backgroundImageUrl()
     return m_background_image_url;
 }
 
-//setter methods
 void BackEnd::setFontStyle(const QFont &font)
 {
     m_font_style = font;
@@ -129,18 +127,41 @@ QString BackEnd::generateWordMap(QString text)
         qDebug() << "Unsorted Word List: ";
         qDebug() << m_word_list;
 
-        //get an ordered vector of the words
-        m_word_list_ordered.operator=(wordListOrdered(m_word_list));
-        qDebug() << "Sorted Word List: ";
-        qDebug() << m_word_list_ordered;
+        if(m_word_list.size() == 0)
+        {
+            qDebug() << "[ERROR] The word list is empty";
+            return "The word list is empty";
+        }
+        else
+        {
+            //get an ordered vector of the words
+            m_word_list_ordered.operator=(wordListOrdered(m_word_list));
+            qDebug() << "Sorted Word List: ";
+            qDebug() << m_word_list_ordered;
 
-        qDebug() << "Font Style: " << m_font_style;
-        qDebug() << "Font Color: " << m_font_color;
-        qDebug() << "Background Color: " << m_background_color;
+            qDebug() << "Font Style: " << m_font_style;
+            qDebug() << "Font Color: " << m_font_color;
+            qDebug() << "Background Color: " << m_background_color;
 
-        return "";
+            //display the Word Map Dialog
+            WordMap wordMap;
+            wordMap.setWords(m_word_list_ordered);
+            wordMap.setFontStyle(m_font_style);
+            wordMap.setFontColor(m_font_color);
+            wordMap.setBackgroundColor(m_background_color);
+            wordMap.setBackgroundImageUrl(m_background_image_url);
+            wordMap.setBackgroundShape(m_background_shape);
+
+            wordMap.show();
+            wordMap.exec();
+
+
+            return "";
+        }
+
     }
-    else {
+    else
+    {
         qDebug() << "[ERROR] Not all inputs have values";
         return "Not all inputs have values";
     }
@@ -151,28 +172,40 @@ QString BackEnd::generateWordMap(QString text)
 //punctiation is ignored and newlines. Also words on the ignore list will be filtered out ****
 QHash<QString, int> BackEnd::wordList(QString &text)
 {
+    //load the list from the database
+    m_database.openConnection();
+    QVector<QString> ignoreList = m_database.selectActiveIgnoreList();
+    m_database.closeConnection();
+
     QHash<QString, int> hash;
-    //remove everything except for letters
+
+    //remove everything except for letters and change to lowercase. Keeps the white space
     text = text.replace("\n", " ");
-    text = text.remove(QRegularExpression("[^a-zA-Z\\d\\s]"));
+    text = text.remove(QRegularExpression("[^a-zA-Z\\s]"));
+    text = text.toLower();
 
     //qDebug() << "Text Words: ";
     //seperate each word and insert it into the data structures
     for(QString word : text.split(" ", QString::SkipEmptyParts))
     {
-        //don't care about case sensitivity
-        word = word.toLower();
-
-        //qDebug() << "Word: " << word;
-
-        //determine the words frequency
-        if(hash.contains(word))
+        //only add the word if it doesnt appear in the active ignored word list
+        if(!ignoreList.contains(word))
         {
-            hash[word] ++;
+            qDebug() << "Word: " << word;
+
+            //determine the words frequency
+            if(hash.contains(word))
+            {
+                hash[word] ++;
+            }
+            else
+            {
+                hash.insert(word, 1);
+            }
         }
         else
         {
-            hash.insert(word, 1);
+            qDebug() << "Ignored Word: " << word;
         }
     }
 
@@ -183,26 +216,28 @@ QHash<QString, int> BackEnd::wordList(QString &text)
 //put them into a vector that will be sorted ascending (least to greatest)
 QVector<QPair<int, QString>> BackEnd::wordListOrdered(const QHash<QString, int> &hash)
 {
-    QVector<QPair<int, QString>> vector;
     QHashIterator<QString, int> iterator(hash);
 
-    //qDebug() << "Unsorted Word List: ";
+    QVector<QPair<int, QString>> wordList;
+
+    qDebug() << "Unsorted Word List: ";
     while (iterator.hasNext())
     {
         iterator.next();
-        vector.append(QPair<int, QString>(iterator.value(), iterator.key()));
-        //qDebug() << "Key: " << iterator.key() << " Value: " << iterator.value();
+
+        wordList.append(QPair<int, QString>(iterator.value(), iterator.key()));
+        qDebug() << "Key: " << iterator.key() << " Value: " << iterator.value();
     }
 
     //sorts in accending order
-    qSort(vector.begin(), vector.end());
+    qSort(wordList.begin(), wordList.end());
 
-    /*
+
     qDebug() << "Sorted Word List: ";
-    for (QPair<int, QString> pair : vector)
+    for (QPair<int, QString> pair : wordList)
     {
         qDebug() << "Key: " << pair.first << " Value: " << pair.second;
     }
-    */
-    return vector;
+
+    return wordList;
 }

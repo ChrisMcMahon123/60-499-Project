@@ -3,9 +3,9 @@
 IgnoreList::IgnoreList(QObject *parent) : QObject(parent)
 {
     //load the words from the database into the list
-    m_databaseHelper = DatabaseHelper(false);
-
-    const QVector<QPair<QString, bool>> m_words = m_databaseHelper.selectIgnoreList();
+    m_database.openConnection();
+    const QVector<QPair<QString, bool>> m_words = m_database.selectIgnoreList();
+    m_database.closeConnection();
 
     IgnoreItem item;
 
@@ -37,32 +37,32 @@ bool IgnoreList::setItemAt(int index, const IgnoreItem &item)
     }
 
     m_items[index] = item;
-    m_databaseHelper.updateWordActiveFlag(m_items[index].word, m_items[index].active);
+    m_database.updateWordActiveFlag(m_items[index].word, m_items[index].active);
 
     return true;
 }
 
 QString IgnoreList::appendItem(const QString &word)
 {
+    IgnoreItem item;
+    item.active = true;
+    item.word = removeCharacters(word);
 
     //perform a check before adding the word to the list
-    if(word.isEmpty()) {
-        return "The word already exists in the list";
+    if(item.word.isEmpty()) {
+        //after removing invalid words, its empty or already was empty
+        return "Cannot add a blank word";
     }
 
-    if(m_databaseHelper.insertIgnoreWord(word) == 0)
+    if(m_database.insertIgnoreWord(item.word) == 0)
     {
-        //there was an error - word already exists
+        //word already exists in the database
         return "The word already exists in the list";
     }
 
     emit preItemAppended();
 
-    IgnoreItem item;
-    item.active = true;
-    item.word = word;
     m_items.append(item);
-
 
     emit postItemAppended();
 
@@ -76,9 +76,33 @@ void IgnoreList::removeItem(const QString &word)
             emit preItemRemoved(i);
 
             m_items.removeAt(i);
-            m_databaseHelper.removeIgnoreWord(word);
+            m_database.removeIgnoreWord(word);
 
             emit postItemRemoved();
         }
     }
+}
+
+void IgnoreList::openConnection()
+{
+    m_database.openConnection();
+}
+
+void IgnoreList::closeConnection()
+{
+    m_database.closeConnection();
+}
+
+//this function will remove everything except letters from a given string and then return it.
+//will also convert to lower case.
+QString IgnoreList::removeCharacters(const QString string)
+{
+    QString word = string;
+    word = word.replace("\n", "");
+    word = word.replace(" ", "");
+    //only allow letters, remove everythign else
+    word = word.remove(QRegularExpression("[^a-zA-Z]"));
+    word = word.toLower();
+
+    return word;
 }

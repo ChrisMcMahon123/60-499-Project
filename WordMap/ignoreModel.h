@@ -11,9 +11,9 @@ class IgnoreList;
 class IgnoreModel : public QAbstractListModel
 {
     Q_OBJECT
+public:
     Q_PROPERTY(IgnoreList *list READ list WRITE setList)
 
-public:
     explicit IgnoreModel(QObject *parent = nullptr);
 
     enum {
@@ -21,18 +21,11 @@ public:
         WordRole
     };
 
-    // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-
-    // Editable:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-
     Qt::ItemFlags flags(const QModelIndex& index) const override;
-
     virtual QHash<int, QByteArray> roleNames() const override;
-
     IgnoreList *list() const;
     void setList(IgnoreList *);
 

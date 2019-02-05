@@ -14,28 +14,20 @@
 class DatabaseHelper
 {
 public:
-    //constructors
     DatabaseHelper();
-    DatabaseHelper(bool);
 
-    //select
     QVector<QPair<QString, bool>> selectIgnoreList();
-
-    //insert
+    QVector<QString> selectActiveIgnoreList();
     int insertIgnoreWord(const QString &);
-
-    //update
     int updateWordActiveFlag(const QString &, const bool &);
-
-    //delete
     int removeIgnoreWord(const QString &);
+    void openConnection();
+    void closeConnection();
 
 private:
-    //internal functions
     void createDatabase(bool);
     QString removeCharacters(const QString);
 
-    //internal variables
     QSqlDatabase m_database;
     QSqlQuery m_query;
 };

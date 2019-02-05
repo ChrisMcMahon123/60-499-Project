@@ -6,17 +6,6 @@ DatabaseHelper::DatabaseHelper()
 
 }
 
-DatabaseHelper::DatabaseHelper(bool flag)
-{
-    m_database = QSqlDatabase::addDatabase("QSQLITE");
-    m_database.setDatabaseName("ignoreList.db");
-    m_database.open();
-
-    m_query = QSqlQuery(m_database);
-
-    createDatabase(flag);
-}
-
 //PUBLIC FUNCTIONS
 QVector<QPair<QString, bool>> DatabaseHelper::selectIgnoreList()
 {
@@ -36,6 +25,32 @@ QVector<QPair<QString, bool>> DatabaseHelper::selectIgnoreList()
     do
     {
         ignoreList.append(QPair<QString, bool>(m_query.value(0).toString(), m_query.value(1).toBool()));
+    }
+    while(m_query.next());
+
+    m_query.finish();
+
+    return ignoreList;
+}
+
+QVector<QString> DatabaseHelper::selectActiveIgnoreList()
+{
+    QVector<QString> ignoreList;
+
+    if(m_query.exec("SELECT word FROM IgnoreList WHERE active_flag = 1"))
+    {
+        qDebug() << "Retrieved all active entries from IgnoreList";
+    }
+    else
+    {
+        qDebug() << m_query.lastError();
+    }
+
+    m_query.first();
+
+    do
+    {
+        ignoreList.append(m_query.value(0).toString());
     }
     while(m_query.next());
 
@@ -108,6 +123,22 @@ int DatabaseHelper::removeIgnoreWord(const QString &string)
     }
 }
 
+void DatabaseHelper::openConnection()
+{
+    m_database = QSqlDatabase::addDatabase("QSQLITE");
+    m_database.setDatabaseName("ignoreList.db");
+    m_database.open();
+
+    m_query = QSqlQuery(m_database);
+
+    createDatabase(false);
+}
+
+void DatabaseHelper::closeConnection()
+{
+    m_database.close();
+}
+
 //PRIVATE FUNCTIONS
 //create the IgnoreList table, will output an error if the table is already present (OK)
 void DatabaseHelper::createDatabase(bool flag)
@@ -163,7 +194,8 @@ QString DatabaseHelper::removeCharacters(const QString string)
     QString word = string;
     word = word.replace("\n", "");
     word = word.replace(" ", "");
-    word = word.remove(QRegularExpression("[^a-zA-Z\\d\\s]"));
+    //only allow letters, remove everythign else
+    word = word.remove(QRegularExpression("[^a-zA-Z]"));
     word = word.toLower();
 
     return word;
