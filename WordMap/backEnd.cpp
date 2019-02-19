@@ -155,7 +155,6 @@ QString BackEnd::generateWordMap(QString text)
             wordMap.show();
             wordMap.exec();
 
-
             return "";
         }
 
@@ -192,16 +191,7 @@ QHash<QString, int> BackEnd::wordList(QString &text)
         if(!ignoreList.contains(word))
         {
             qDebug() << "Word: " << word;
-
-            //determine the words frequency
-            if(hash.contains(word))
-            {
-                hash[word] ++;
-            }
-            else
-            {
-                hash.insert(word, 1);
-            }
+            hash[word] ++;
         }
         else
         {
@@ -231,7 +221,6 @@ QVector<QPair<int, QString>> BackEnd::wordListOrdered(const QHash<QString, int> 
 
     //sorts in accending order
     qSort(wordList.begin(), wordList.end());
-
 
     qDebug() << "Sorted Word List: ";
     for (QPair<int, QString> pair : wordList)

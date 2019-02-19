@@ -49,7 +49,8 @@ QString IgnoreList::appendItem(const QString &word)
     item.word = removeCharacters(word);
 
     //perform a check before adding the word to the list
-    if(item.word.isEmpty()) {
+    if(item.word.isEmpty())
+    {
         //after removing invalid words, its empty or already was empty
         return "Cannot add a blank word";
     }
@@ -61,9 +62,7 @@ QString IgnoreList::appendItem(const QString &word)
     }
 
     emit preItemAppended();
-
     m_items.append(item);
-
     emit postItemAppended();
 
     return "";
@@ -71,8 +70,10 @@ QString IgnoreList::appendItem(const QString &word)
 
 void IgnoreList::removeItem(const QString &word)
 {
-    for (int i = 0; i < m_items.size(); i++) {
-        if (m_items.at(i).word == word) {
+    for (int i = 0; i < m_items.size(); i++)
+    {
+        if (m_items.at(i).word == word)
+        {
             emit preItemRemoved(i);
 
             m_items.removeAt(i);

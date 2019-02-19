@@ -10,7 +10,6 @@ void WordMap::setWords(const QVector<QPair<int, QString>> &words)
     m_words = words;
 }
 
-
 void WordMap::setFontStyle(const QFont &font)
 {
     m_font_style = font;
