@@ -40,20 +40,15 @@ void WordMap::setBackgroundShape(const QString &shape)
     qDebug() << "Background Shape: " << m_background_shape;
 }
 
-void WordMap::showEvent(QShowEvent* event)
+void WordMap::showEvent(QShowEvent *event)
 {
-    QWidget::showEvent( event );
-
-    QLabel *label = new QLabel("Word Frequency:\n");
-
-    for (QPair<int, QString> pair : m_words)
-    {
-        label->setText(label->text() + "Word: " + pair.second + " Frequency: " + QString::number(pair.first) + "\n");
-    }
-
-    QVBoxLayout *layout = new QVBoxLayout();
-    layout->addWidget(label);
-    setLayout(layout);
-    resize(500, 500);
+    QWidget::showEvent(event);
     setWindowTitle(tr("Word Map Preview"));
+    showMaximized();
+}
+
+void WordMap::paintEvent(QPaintEvent *)
+{
+    QPainter m_painter(this);
+    m_painter.drawText(50, 50, "Hello World!");
 }

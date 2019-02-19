@@ -2,6 +2,10 @@
 #define WORDMAP_H
 
 #include <QDialog>
+#include <QPainter>
+#include <QImage>
+#include <QBrush>
+#include <QPixmap>
 #include <QHBoxLayout>
 #include <QtWidgets>
 #include <QtDebug>
@@ -27,6 +31,8 @@ public:
     void setBackgroundShape(const QString &);
 
     void showEvent(QShowEvent*);
+    void paintEvent(QPaintEvent *);
+
 private:
     QVector<QPair<int, QString>> m_words;
     QFont m_font_style;
