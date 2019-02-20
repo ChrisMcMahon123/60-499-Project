@@ -256,8 +256,6 @@ App {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.rightMargin: 7
-        anchors.leftMargin: 7
 
         //divider
         Rectangle {

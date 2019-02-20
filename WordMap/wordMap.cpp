@@ -44,11 +44,39 @@ void WordMap::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
     setWindowTitle(tr("Word Map Preview"));
+    setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
     showMaximized();
 }
 
 void WordMap::paintEvent(QPaintEvent *)
 {
     QPainter m_painter(this);
-    m_painter.drawText(50, 50, "Hello World!");
+
+    m_painter.setBackground(QBrush(m_background_color));
+    m_painter.setBackgroundMode(Qt::OpaqueMode);
+
+    //drawing the shape that contains the words
+    m_painter.setBrush(QBrush(m_background_color));
+
+    if(m_background_shape == "Circle")
+    {
+
+    }
+    else if(m_background_shape == "Triangle")
+    {
+
+    }
+    else if(m_background_shape == "Square")
+    {
+        m_painter.drawRect(50,50,750,750);
+    }
+    else if(m_background_shape == "Rectangle")
+    {
+        m_painter.drawRect(50,50,750,750);
+    }
+
+    //drawing the words
+    m_painter.setFont(m_font_style);
+    m_painter.setBrush(QBrush(m_font_color));
+    m_painter.drawText(100, 100, "Hello World!");
 }
