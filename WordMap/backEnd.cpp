@@ -38,25 +38,25 @@ QUrl BackEnd::backgroundImageUrl()
 void BackEnd::setFontStyle(const QFont &font)
 {
     m_font_style = font;
-    qDebug() << "Font Style: " << m_font_style;
+    //qDebug() << "Font Style: " << m_font_style;
 }
 
 void BackEnd::setFontColor(const QColor &color)
 {
     m_font_color = color;
-    qDebug() << "Font Color: " << m_font_color;
+    //qDebug() << "Font Color: " << m_font_color;
 }
 
 void BackEnd::setBackgroundColor(const QColor &color)
 {
     m_background_color = color;
-    qDebug() << "Background Color: " << m_background_color;
+    //qDebug() << "Background Color: " << m_background_color;
 }
 
 void BackEnd::setBackgroundImageUrl(const QUrl &url)
 {
     m_background_image_url = url;
-    qDebug() << "Background Image Url: " << m_background_image_url;
+    //qDebug() << "Background Image Url: " << m_background_image_url;
 }
 
 
@@ -64,7 +64,7 @@ void BackEnd::setBackgroundImageUrl(const QUrl &url)
 void BackEnd::backgroundShape(const int &index)
 {
     m_background_shape = m_background_shapes_list.at(index);
-    qDebug() << "Background Shape: " << m_background_shape;
+    //qDebug() << "Background Shape: " << m_background_shape;
 }
 
 //given a URL for a text file, this function will extract the contents of it and store
@@ -109,11 +109,11 @@ void BackEnd::resetInputs()
     m_word_list.clear();
     m_word_list_ordered.clear();
 
-    qDebug() << "Reset Input Variables";
-    qDebug() << "Font Style: " << m_font_style;
-    qDebug() << "Font Color: " << m_font_color;
-    qDebug() << "Background Color: " << m_background_color;
-    qDebug() << "Background Shape: " << m_background_shape;
+    //qDebug() << "Reset Input Variables";
+    //qDebug() << "Font Style: " << m_font_style;
+    //qDebug() << "Font Color: " << m_font_color;
+    //qDebug() << "Background Color: " << m_background_color;
+    //qDebug() << "Background Shape: " << m_background_shape;
 }
 
 //public function that the frontend will call to generate the wordmap. If all inputs
@@ -124,8 +124,8 @@ QString BackEnd::generateWordMap(QString text)
     if(text != "") {
         //generate the hashmap to get the frequency of each word
         m_word_list.operator=(wordList(text));
-        qDebug() << "Unsorted Word List: ";
-        qDebug() << m_word_list;
+        //qDebug() << "Unsorted Word List: ";
+        //qDebug() << m_word_list;
 
         if(m_word_list.size() == 0)
         {
@@ -136,12 +136,12 @@ QString BackEnd::generateWordMap(QString text)
         {
             //get an ordered vector of the words
             m_word_list_ordered.operator=(wordListOrdered(m_word_list));
-            qDebug() << "Sorted Word List: ";
-            qDebug() << m_word_list_ordered;
+            //qDebug() << "Sorted Word List: ";
+            //qDebug() << m_word_list_ordered;
 
-            qDebug() << "Font Style: " << m_font_style;
-            qDebug() << "Font Color: " << m_font_color;
-            qDebug() << "Background Color: " << m_background_color;
+            //qDebug() << "Font Style: " << m_font_style;
+            //qDebug() << "Font Color: " << m_font_color;
+            //qDebug() << "Background Color: " << m_background_color;
 
             //display the Word Map Dialog
             WordMap wordMap;
@@ -190,12 +190,12 @@ QHash<QString, int> BackEnd::wordList(QString &text)
         //only add the word if it doesnt appear in the active ignored word list
         if(!ignoreList.contains(word))
         {
-            qDebug() << "Word: " << word;
+            //qDebug() << "Word: " << word;
             hash[word] ++;
         }
         else
         {
-            qDebug() << "Ignored Word: " << word;
+            //qDebug() << "Ignored Word: " << word;
         }
     }
 
@@ -210,23 +210,24 @@ QVector<QPair<int, QString>> BackEnd::wordListOrdered(const QHash<QString, int> 
 
     QVector<QPair<int, QString>> wordList;
 
-    qDebug() << "Unsorted Word List: ";
+    //qDebug() << "Unsorted Word List: ";
     while (iterator.hasNext())
     {
         iterator.next();
 
         wordList.append(QPair<int, QString>(iterator.value(), iterator.key()));
-        qDebug() << "Key: " << iterator.key() << " Value: " << iterator.value();
+        //qDebug() << "Key: " << iterator.key() << " Value: " << iterator.value();
     }
 
     //sorts in accending order
     qSort(wordList.begin(), wordList.end());
 
+    /*
     qDebug() << "Sorted Word List: ";
     for (QPair<int, QString> pair : wordList)
     {
         qDebug() << "Key: " << pair.first << " Value: " << pair.second;
     }
-
+    */
     return wordList;
 }

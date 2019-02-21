@@ -2,7 +2,7 @@
 
 WordMap::WordMap(QDialog *parent) : QDialog(parent)
 {
-
+    qDebug() << "Word Map Class!";
 }
 
 void WordMap::setWords(const QVector<QPair<int, QString>> &words)
@@ -43,40 +43,57 @@ void WordMap::setBackgroundShape(const QString &shape)
 void WordMap::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
+
+    //save button on the toolbar
+    saveButton = new QToolButton(toolbar);
+    saveButton->setIcon(QIcon("assets/icons8-image-file-50.svg"));
+    saveButton->setText(tr("Save Word Map"));
+    saveButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    connect(saveButton, SIGNAL(clicked()), this, SLOT(saveItem()));//'on button click'
+
+    //toolbar
+    toolbar = new QToolBar(this);
+    toolbar->setFloatable(false);
+    toolbar->setMovable(false);
+    toolbar->addWidget(saveButton);
+
+    painter = new WordPainter(this);
+    painter->setWords(m_words);
+    painter->setFontStyle(m_font_style);
+    painter->setFontColor(m_font_color);
+    painter->setBackgroundColor(m_background_color);
+    painter->setBackgroundShape(m_background_shape);
+    painter->setBackgroundImageUrl(m_background_image_url);
+
+    //scrollarea containing the wordPainter widget
+    scrollArea = new QScrollArea(this);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setWidget(painter);
+    scrollArea->setAlignment(Qt::AlignCenter);
+    //scrollArea->setWidget(new QLabel("Hello World\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLL"));
+
+    //main layout for the qdialog
+    mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0,0,0,0);
+    mainLayout->addWidget(scrollArea);
+    mainLayout->addWidget(toolbar);
+
+    setMinimumSize(500,500);
+    setLayout(mainLayout);
     setWindowTitle(tr("Word Map Preview"));
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
-    showMaximized();
 }
 
 void WordMap::paintEvent(QPaintEvent *)
 {
-    QPainter m_painter(this);
 
-    m_painter.setBackground(QBrush(m_background_color));
-    m_painter.setBackgroundMode(Qt::OpaqueMode);
+}
 
-    //drawing the shape that contains the words
-    m_painter.setBrush(QBrush(m_background_color));
+void WordMap::saveItem()
+{
+    QString saveFileName = QFileDialog::getSaveFileName(this, tr("Save File"), "WordMap", tr("Images (*.png *.xpm *.jpg)"));
 
-    if(m_background_shape == "Circle")
-    {
-
-    }
-    else if(m_background_shape == "Triangle")
-    {
-
-    }
-    else if(m_background_shape == "Square")
-    {
-        m_painter.drawRect(50,50,750,750);
-    }
-    else if(m_background_shape == "Rectangle")
-    {
-        m_painter.drawRect(50,50,750,750);
-    }
-
-    //drawing the words
-    m_painter.setFont(m_font_style);
-    m_painter.setBrush(QBrush(m_font_color));
-    m_painter.drawText(100, 100, "Hello World!");
+    qDebug() << "Save Word Map to Image File!";
+    qDebug() << "File Name: " << saveFileName;
 }
