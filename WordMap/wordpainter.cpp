@@ -46,7 +46,7 @@ void WordPainter::paintEvent(QPaintEvent *)
     qDebug() << "Paint all the things!";
 
     QPainter m_painter(this);
-    m_painter.setBackground(QBrush(Qt::blue));
+    m_painter.setBackground(QBrush(m_background_color));
     m_painter.setBackgroundMode(Qt::OpaqueMode);
     m_painter.setRenderHint(QPainter::Antialiasing,true);
 
@@ -89,7 +89,16 @@ void WordPainter::paintEvent(QPaintEvent *)
     //drawing the words
     m_painter.setFont(m_font_style);
     m_painter.setPen(m_font_color);
-    m_painter.drawText(50, 50, "Hello World!");
+
+    //debug
+    int x = 50;
+    int y = 50;
+
+    for(QPair<int, QString> pair : m_words)
+    {
+        m_painter.drawText(x, y, pair.second);
+        y += 50;
+    }
 
     qDebug() << "Finished Painting!";
 }
