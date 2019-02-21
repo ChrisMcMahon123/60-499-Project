@@ -44,6 +44,11 @@ void WordMap::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
 
+    //toolbar
+    toolbar = new QToolBar(this);
+    toolbar->setFloatable(false);
+    toolbar->setMovable(false);
+
     //save button on the toolbar
     saveButton = new QToolButton(toolbar);
     saveButton->setIcon(QIcon("assets/icons8-image-file-50.svg"));
@@ -51,10 +56,6 @@ void WordMap::showEvent(QShowEvent *event)
     saveButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     connect(saveButton, SIGNAL(clicked()), this, SLOT(saveItem()));//'on button click'
 
-    //toolbar
-    toolbar = new QToolBar(this);
-    toolbar->setFloatable(false);
-    toolbar->setMovable(false);
     toolbar->addWidget(saveButton);
 
     painter = new WordPainter(this);

@@ -1,22 +1,25 @@
-#ifndef WORDMAP_H
-#define WORDMAP_H
+#ifndef WORDPAINTER_H
+#define WORDPAINTER_H
 
-#include <QDialog>
-#include <QScrollArea>
-#include <QVBoxLayout>
+#include <QWidget>
+#include <QBrush>
+#include <QPixmap>
+#include <QPainter>
+#include <QFont>
+#include <QColor>
+#include <QUrl>
+#include <QPair>
+#include <QString>
+#include <QVector>
+#include <QDebug>
 #include <QLabel>
-#include <QToolBar>
-#include <QIcon>
-#include <QToolButton>
-#include <QFileDialog>
+#include <QVBoxLayout>
 
-#include <wordPainter.h>
-
-class WordMap : public QDialog
+class WordPainter : public QWidget
 {
     Q_OBJECT
 public:
-    WordMap(QDialog *parent = nullptr);
+    explicit WordPainter(QWidget *parent = nullptr);
 
     void setWords(const QVector<QPair<int, QString>> &);
     void setFontStyle(const QFont &);
@@ -25,11 +28,7 @@ public:
     void setBackgroundImageUrl(const QUrl &);
     void setBackgroundShape(const QString &);
 
-    void showEvent(QShowEvent*);
     void paintEvent(QPaintEvent *);
-
-public slots:
-        void saveItem();
 
 private:
     QVector<QPair<int, QString>> m_words;
@@ -38,12 +37,7 @@ private:
     QColor m_background_color;
     QUrl m_background_image_url;
     QString m_background_shape;
-
-    WordPainter *painter;
-    QScrollArea *scrollArea;
-    QVBoxLayout *mainLayout;
-    QToolBar *toolbar;
-    QToolButton *saveButton;
 };
 
-#endif // WORDMAP_H
+
+#endif // WORDPAINTER_H
