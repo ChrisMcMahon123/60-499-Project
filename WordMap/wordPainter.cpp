@@ -1,62 +1,44 @@
 #include "wordPainter.h"
 
-WordPainter::WordPainter(QWidget *parent) : QWidget(parent)
+WordPainter::WordPainter(QWidget *parent,
+                         const QVector<QPair<int, QString>> &words,
+                         const QFont &font ,
+                         const QColor &font_color,
+                         const QColor &background_color,
+                         const QString &shape,
+                         const QString &size,
+                         const QUrl &url
+                        ) : QWidget(parent)
 {
-    qDebug() << "Word Painter Class!";
-    setMinimumSize(QSize(1920, 1080));
-}
-
-void WordPainter::setWords(const QVector<QPair<int, QString>> &words)
-{
+    qDebug() << "Word Painter Class";
     m_words = words;
-}
-
-void WordPainter::setFontStyle(const QFont &font)
-{
     m_font_style = font;
-    qDebug() << "Font Style: " << m_font_style;
-}
-
-void WordPainter::setFontColor(const QColor &color)
-{
-    m_font_color = color;
-    qDebug() << "Font Color: " << m_font_color;
-}
-
-void WordPainter::setBackgroundColor(const QColor &color)
-{
-    m_background_color = color;
-    qDebug() << "Background Color: " << m_background_color;
-}
-
-void WordPainter::setBackgroundImageUrl(const QUrl &url)
-{
-    m_background_image_url = url;
-    qDebug() << "Background Image Url: " << m_background_image_url;
-}
-
-void WordPainter::setBackgroundShape(const QString &shape)
-{
+    m_font_color = font_color;
+    m_background_color = background_color;
     m_background_shape = shape;
-    qDebug() << "Background Shape: " << m_background_shape;
+    m_shape_size = size;
+    m_background_image_url = url;
+
+    qDebug() << "Size: " << m_shape_size;
+    //widget parameters
+    setMinimumSize(QSize(595, 842));
+    setMaximumSize(QSize(1920,1080));
 }
 
 void WordPainter::paintEvent(QPaintEvent *)
 {
-    qDebug() << "Paint all the things!";
-
-    QPainter m_painter(this);
-    m_painter.setBackground(QBrush(m_background_color));
-    m_painter.setBackgroundMode(Qt::OpaqueMode);
-    m_painter.setRenderHint(QPainter::Antialiasing,true);
+    QPainter painter(this);
+    painter.setBackground(QBrush(m_background_color));
+    painter.setBackgroundMode(Qt::OpaqueMode);
+    painter.setRenderHint(QPainter::Antialiasing,true);
 
     //drawing the shape that contains the words
-    m_painter.setPen (Qt::NoPen);//no 'outline' for the shape
-    m_painter.setBrush(QBrush(m_background_color));
+    painter.setPen (Qt::NoPen);//no 'outline' for the shape
+    painter.setBrush(QBrush(m_background_color));
 
     if(m_background_shape == "Circle")
     {
-        m_painter.drawEllipse(0,0,1250,1250);
+        painter.drawEllipse(0,0,1250,1250);
     }
     else if(m_background_shape == "Triangle")
     {
@@ -75,30 +57,35 @@ void WordPainter::paintEvent(QPaintEvent *)
         path.lineTo(endPointX2, endPointY2);
         path.lineTo(startPointX1, startPointY1);
 
-        m_painter.fillPath(path, QBrush(m_background_color));
+        painter.fillPath(path, QBrush(m_background_color));
     }
     else if(m_background_shape == "Square")
     {
-        m_painter.drawRect(0,0,850,850);
+        painter.drawRect(0,0,850,850);
     }
     else if(m_background_shape == "Rectangle")
     {
-        m_painter.drawRect(0,0,1700,1000);
+        painter.drawRect(0,0,1700,1000);
     }
 
     //drawing the words
-    m_painter.setFont(m_font_style);
-    m_painter.setPen(m_font_color);
+    painter.setFont(m_font_style);
+    painter.setPen(m_font_color);
 
     //debug
     int x = 50;
     int y = 50;
+    painter.save();
+    painter.rotate(15);//in terms of degrees - clockwise rotation
+    painter.scale(1.5,1.5);//in terms of % == 1.0 = %100
 
     for(QPair<int, QString> pair : m_words)
     {
-        m_painter.drawText(x, y, pair.second);
-        y += 50;
+        painter.drawText(x, y, pair.second);
+        x += 50;
+        y += 15;
     }
 
-    qDebug() << "Finished Painting!";
+    painter.restore();
+    painter.drawPixmap(QRect(QPoint(0,0),QPoint(595, 842)),QPixmap(m_background_image_url.toLocalFile()));
 }

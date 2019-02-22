@@ -1,43 +1,28 @@
 #include "wordMap.h"
 
-WordMap::WordMap(QDialog *parent) : QDialog(parent)
+WordMap::WordMap(QDialog *parent,
+                 const QVector<QPair<int, QString>> &words,
+                 const QFont &font ,
+                 const QColor &font_color,
+                 const QColor &background_color,
+                 const QString &shape,
+                 const QString &size,
+                 const QUrl &url
+                ) : QDialog(parent)
 {
-    qDebug() << "Word Map Class!";
-}
-
-void WordMap::setWords(const QVector<QPair<int, QString>> &words)
-{
+    qDebug() << "Word Map Class";
     m_words = words;
-}
-
-void WordMap::setFontStyle(const QFont &font)
-{
     m_font_style = font;
-    qDebug() << "Font Style: " << m_font_style;
-}
-
-void WordMap::setFontColor(const QColor &color)
-{
-    m_font_color = color;
-    qDebug() << "Font Color: " << m_font_color;
-}
-
-void WordMap::setBackgroundColor(const QColor &color)
-{
-    m_background_color = color;
-    qDebug() << "Background Color: " << m_background_color;
-}
-
-void WordMap::setBackgroundImageUrl(const QUrl &url)
-{
-    m_background_image_url = url;
-    qDebug() << "Background Image Url: " << m_background_image_url;
-}
-
-void WordMap::setBackgroundShape(const QString &shape)
-{
+    m_font_color = font_color;
+    m_background_color = background_color;
     m_background_shape = shape;
-    qDebug() << "Background Shape: " << m_background_shape;
+    m_shape_size = size;
+    m_background_image_url = url;
+
+    //dialog parameters
+    setMinimumSize(500,500);
+    setWindowTitle(tr("Word Map Preview"));
+    setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
 }
 
 void WordMap::showEvent(QShowEvent *event)
@@ -45,56 +30,44 @@ void WordMap::showEvent(QShowEvent *event)
     QWidget::showEvent(event);
 
     //toolbar
-    toolbar = new QToolBar(this);
-    toolbar->setFloatable(false);
-    toolbar->setMovable(false);
+    m_toolbar = new QToolBar(this);
+    m_toolbar->setFloatable(false);
+    m_toolbar->setMovable(false);
 
     //save button on the toolbar
-    saveButton = new QToolButton(toolbar);
-    saveButton->setIcon(QIcon("assets/icons8-image-file-50.svg"));
-    saveButton->setText(tr("Save Word Map"));
-    saveButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    connect(saveButton, SIGNAL(clicked()), this, SLOT(saveItem()));//'on button click'
+    m_save_button = new QToolButton(m_toolbar);
+    m_save_button->setIcon(QIcon("assets/icons8-image-file-50.svg"));
+    m_save_button->setText(tr("Save Word Map"));
+    m_save_button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    connect(m_save_button, SIGNAL(clicked()), this, SLOT(saveImage()));//'on button click'
 
-    toolbar->addWidget(saveButton);
+    m_toolbar->addWidget(m_save_button);
 
-    painter = new WordPainter(this);
-    painter->setWords(m_words);
-    painter->setFontStyle(m_font_style);
-    painter->setFontColor(m_font_color);
-    painter->setBackgroundColor(m_background_color);
-    painter->setBackgroundShape(m_background_shape);
-    painter->setBackgroundImageUrl(m_background_image_url);
+    //painter that will display the word map
+    m_painter = new WordPainter(this, m_words, m_font_style, m_font_color, m_background_color, m_background_shape, m_shape_size, m_background_image_url);
 
-    //scrollarea containing the wordPainter widget
-    scrollArea = new QScrollArea(this);
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    scrollArea->setWidget(painter);
-    scrollArea->setAlignment(Qt::AlignCenter);
-    //scrollArea->setWidget(new QLabel("Hello World\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLLHELLOLLLLLLLLLLLL"));
+    //scrollarea containing the painter object
+    m_scroll_area = new QScrollArea(this);
+    m_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    m_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    m_scroll_area->setWidget(m_painter);
+    m_scroll_area->setAlignment(Qt::AlignCenter);
 
-    //main layout for the qdialog
-    mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0,0,0,0);
-    mainLayout->addWidget(scrollArea);
-    mainLayout->addWidget(toolbar);
+    //main layout for the dialog
+    m_main_layout = new QVBoxLayout(this);
+    m_main_layout->setContentsMargins(0,0,0,0);
+    m_main_layout->addWidget(m_scroll_area);
+    m_main_layout->addWidget(m_toolbar);
 
-    setMinimumSize(500,500);
-    setLayout(mainLayout);
-    setWindowTitle(tr("Word Map Preview"));
-    setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
+    setLayout(m_main_layout);
 }
 
-void WordMap::paintEvent(QPaintEvent *)
-{
-
-}
-
-void WordMap::saveItem()
+void WordMap::saveImage()
 {
     QString saveFileName = QFileDialog::getSaveFileName(this, tr("Save File"), "WordMap", tr("Images (*.png *.xpm *.jpg)"));
 
     qDebug() << "Save Word Map to Image File!";
     qDebug() << "File Name: " << saveFileName;
+
+    //write the painter object to the save file
 }

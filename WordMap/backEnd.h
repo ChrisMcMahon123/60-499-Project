@@ -22,6 +22,7 @@ class BackEnd : public QObject
     Q_OBJECT
 public:
     Q_INVOKABLE void backgroundShape(const int &);
+    Q_INVOKABLE void shapeSize(const int &);
     Q_INVOKABLE QString textFileContents(const QUrl &);
     Q_INVOKABLE void resetInputs();
     Q_INVOKABLE QString generateWordMap(QString);
@@ -52,10 +53,13 @@ private:
     QFont m_font_style;
     QColor m_font_color;
     QColor m_background_color;
-    QUrl m_background_image_url;
     QString m_background_shape;
+    QString m_shape_size;
+    QUrl m_background_image_url;
 
+    //lists that are identical to their QML counterparts
     QVector<QString> m_background_shapes_list;
+    QVector<QString> m_shape_size_list;
 
     //non ordered list of words and their frequencies
     QHash<QString, int> m_word_list;

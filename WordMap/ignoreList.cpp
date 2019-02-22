@@ -24,14 +24,14 @@ QVector<IgnoreItem> IgnoreList::items() const
 
 bool IgnoreList::setItemAt(int index, const IgnoreItem &item)
 {
-    if (index < 0 || index >= m_items.size())
+    if(index < 0 || index >= m_items.size())
     {
         return false;
     }
 
     const IgnoreItem &oldItem = m_items.at(index);
 
-    if (item.active == oldItem.active && item.word == oldItem.word)
+    if(item.active == oldItem.active && item.word == oldItem.word)
     {
         return false;
     }
@@ -70,9 +70,9 @@ QString IgnoreList::appendItem(const QString &word)
 
 void IgnoreList::removeItem(const QString &word)
 {
-    for (int i = 0; i < m_items.size(); i++)
+    for(int i = 0; i < m_items.size(); i++)
     {
-        if (m_items.at(i).word == word)
+        if(m_items.at(i).word == word)
         {
             emit preItemRemoved(i);
 

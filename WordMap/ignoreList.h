@@ -8,7 +8,6 @@
 
 //tutorial followed:
 //https://github.com/mitchcurtis/todo-list-tutorial
-
 struct IgnoreItem
 {
     bool active;

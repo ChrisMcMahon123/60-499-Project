@@ -20,14 +20,14 @@ int IgnoreModel::rowCount(const QModelIndex &parent) const
 
 QVariant IgnoreModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || !m_list)
+    if(!index.isValid() || !m_list)
     {
         return QVariant();
     }
 
     const IgnoreItem item = m_list->items().at(index.row());
 
-    switch (role)
+    switch(role)
     {
         case ActiveRole:
             return QVariant(item.active);
@@ -40,14 +40,14 @@ QVariant IgnoreModel::data(const QModelIndex &index, int role) const
 
 bool IgnoreModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!m_list)
+    if(!m_list)
     {
         return false;
     }
 
     IgnoreItem item = m_list->items().at(index.row());
 
-    switch (role)
+    switch(role)
     {
         case ActiveRole:
             item.active = value.toBool();
@@ -57,7 +57,7 @@ bool IgnoreModel::setData(const QModelIndex &index, const QVariant &value, int r
             break;
     }
 
-    if (m_list->setItemAt(index.row(), item))
+    if(m_list->setItemAt(index.row(), item))
     {
         emit dataChanged(index, index, QVector<int>() << role);
         return true;
@@ -70,7 +70,7 @@ bool IgnoreModel::setData(const QModelIndex &index, const QVariant &value, int r
 
 Qt::ItemFlags IgnoreModel::flags(const QModelIndex &index) const
 {
-    if (!index.isValid())   
+    if(!index.isValid())
     {
         return Qt::NoItemFlags;
     }
@@ -96,14 +96,14 @@ void IgnoreModel::setList(IgnoreList *list)
 {
     beginResetModel();
 
-    if (m_list)
+    if(m_list)
     {
         m_list->disconnect(this);
     }
 
     m_list = list;
 
-    if (m_list)
+    if(m_list)
     {
         connect(m_list, &IgnoreList::preItemAppended, this, [=]()
         {

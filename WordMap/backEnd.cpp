@@ -3,14 +3,19 @@
 //constructor
 BackEnd::BackEnd(QObject *parent) : QObject(parent)
 {
-    //default formatting values
+    //set the default formatting values
     resetInputs();
 
-    //are the same entries that appear in QML, looking at potentially linking the two
+    //add the same entries that appear in QML
     m_background_shapes_list.append("Square");
     m_background_shapes_list.append("Rectangle");
     m_background_shapes_list.append("Circle");
     m_background_shapes_list.append("Triangle");
+
+    m_shape_size_list.append("Standard");
+    m_shape_size_list.append("Medium");
+    m_shape_size_list.append("Large");
+    m_shape_size_list.append("Extra Large");
 }
 
 //PUBLIC FUNCTIONS
@@ -38,33 +43,32 @@ QUrl BackEnd::backgroundImageUrl()
 void BackEnd::setFontStyle(const QFont &font)
 {
     m_font_style = font;
-    //qDebug() << "Font Style: " << m_font_style;
 }
 
 void BackEnd::setFontColor(const QColor &color)
 {
     m_font_color = color;
-    //qDebug() << "Font Color: " << m_font_color;
 }
 
 void BackEnd::setBackgroundColor(const QColor &color)
 {
     m_background_color = color;
-    //qDebug() << "Background Color: " << m_background_color;
 }
 
 void BackEnd::setBackgroundImageUrl(const QUrl &url)
 {
     m_background_image_url = url;
-    //qDebug() << "Background Image Url: " << m_background_image_url;
 }
-
 
 //Q_INVOKABLE
 void BackEnd::backgroundShape(const int &index)
 {
     m_background_shape = m_background_shapes_list.at(index);
-    //qDebug() << "Background Shape: " << m_background_shape;
+}
+
+void BackEnd::shapeSize(const int &index)
+{
+    m_shape_size = m_shape_size_list.at(index);
 }
 
 //given a URL for a text file, this function will extract the contents of it and store
@@ -75,7 +79,6 @@ QString BackEnd::textFileContents(const QUrl &url)
 
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[ERROR] Failed to open text file";
         return "[ERROR] Failed to open text file";
     }
     else
@@ -86,7 +89,7 @@ QString BackEnd::textFileContents(const QUrl &url)
 
         while(!input.atEnd())
         {
-            //will end on /n, need to manually add it back to preserve document
+            //will end on /n, need to manually add it back to preserve document format
             text += input.readLine() + "\n";
         }
 
@@ -104,16 +107,11 @@ void BackEnd::resetInputs()
     m_font_style = QFont("Sans Serif,9,-1,5,50,0,0,0,0,0");//sans serif, 9 font size
     m_font_color = QColor(0, 0, 0, 1);//black
     m_background_color = QColor(1, 1, 1, 1);//white
-    m_background_image_url = QUrl();
     m_background_shape = "Square";
+    m_background_shape = "Standard";
+    m_background_image_url = QUrl();
     m_word_list.clear();
     m_word_list_ordered.clear();
-
-    //qDebug() << "Reset Input Variables";
-    //qDebug() << "Font Style: " << m_font_style;
-    //qDebug() << "Font Color: " << m_font_color;
-    //qDebug() << "Background Color: " << m_background_color;
-    //qDebug() << "Background Shape: " << m_background_shape;
 }
 
 //public function that the frontend will call to generate the wordmap. If all inputs
@@ -122,10 +120,8 @@ QString BackEnd::generateWordMap(QString text)
 {
     //check to ensure all variables are set
     if(text != "") {
-        //generate the hashmap to get the frequency of each word
+        //generate a hashmap to get the frequency of each word
         m_word_list.operator=(wordList(text));
-        //qDebug() << "Unsorted Word List: ";
-        //qDebug() << m_word_list;
 
         if(m_word_list.size() == 0)
         {
@@ -136,28 +132,15 @@ QString BackEnd::generateWordMap(QString text)
         {
             //get an ordered vector of the words
             m_word_list_ordered.operator=(wordListOrdered(m_word_list));
-            //qDebug() << "Sorted Word List: ";
-            //qDebug() << m_word_list_ordered;
-
-            //qDebug() << "Font Style: " << m_font_style;
-            //qDebug() << "Font Color: " << m_font_color;
-            //qDebug() << "Background Color: " << m_background_color;
 
             //display the Word Map Dialog
-            WordMap wordMap;
-            wordMap.setWords(m_word_list_ordered);
-            wordMap.setFontStyle(m_font_style);
-            wordMap.setFontColor(m_font_color);
-            wordMap.setBackgroundColor(m_background_color);
-            wordMap.setBackgroundImageUrl(m_background_image_url);
-            wordMap.setBackgroundShape(m_background_shape);
+            WordMap wordMap(nullptr, m_word_list_ordered, m_font_style, m_font_color, m_background_color, m_background_shape, m_shape_size, m_background_image_url);
 
             wordMap.show();
             wordMap.exec();
 
             return "";
         }
-
     }
     else
     {
@@ -207,11 +190,10 @@ QHash<QString, int> BackEnd::wordList(QString &text)
 QVector<QPair<int, QString>> BackEnd::wordListOrdered(const QHash<QString, int> &hash)
 {
     QHashIterator<QString, int> iterator(hash);
-
     QVector<QPair<int, QString>> wordList;
 
     //qDebug() << "Unsorted Word List: ";
-    while (iterator.hasNext())
+    while(iterator.hasNext())
     {
         iterator.next();
 

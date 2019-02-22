@@ -5,7 +5,6 @@
 
 //tutorial followed:
 //https://github.com/mitchcurtis/todo-list-tutorial
-
 class IgnoreList;
 
 class IgnoreModel : public QAbstractListModel

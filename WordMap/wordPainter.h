@@ -12,21 +12,20 @@
 #include <QString>
 #include <QVector>
 #include <QDebug>
-#include <QLabel>
 #include <QVBoxLayout>
 
 class WordPainter : public QWidget
 {
     Q_OBJECT
 public:
-    explicit WordPainter(QWidget *parent = nullptr);
-
-    void setWords(const QVector<QPair<int, QString>> &);
-    void setFontStyle(const QFont &);
-    void setFontColor(const QColor &);
-    void setBackgroundColor(const QColor &);
-    void setBackgroundImageUrl(const QUrl &);
-    void setBackgroundShape(const QString &);
+    explicit WordPainter(QWidget *parent = nullptr,
+                         const QVector<QPair<int, QString>> &words = QVector<QPair<int, QString>>(),
+                         const QFont &font = QFont(),
+                         const QColor &font_color = QColor(),
+                         const QColor &background_color = QColor(),
+                         const QString &shape = "",
+                         const QString &size = "",
+                         const QUrl &url = QUrl());
 
     void paintEvent(QPaintEvent *);
 
@@ -35,8 +34,9 @@ private:
     QFont m_font_style;
     QColor m_font_color;
     QColor m_background_color;
-    QUrl m_background_image_url;
     QString m_background_shape;
+    QString m_shape_size;
+    QUrl m_background_image_url;
 };
 
 

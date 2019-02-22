@@ -68,7 +68,7 @@ App {
 
                 AppText {
                     Layout.alignment: Qt.AlignLeft
-                    text: "Source Text"
+                    text: qsTr("Source Text")
                     font.pointSize: 11
                 }
 
@@ -120,7 +120,7 @@ App {
                 width: root.width
 
                 AppText {
-                    text: "Text Filter List"
+                    text: qsTr("Text Filter List")
                     font.pointSize: 11
                     Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 }
@@ -143,7 +143,7 @@ App {
             }
 
             AppText {
-                text: "Formatting and Styling"
+                text: qsTr("Formatting and Styling")
                 font.pointSize: 11
                 Layout.topMargin: 5
             }
@@ -153,7 +153,7 @@ App {
                 width: root.width
 
                 AppText {
-                    text: "Font Style"
+                    text: qsTr("Font Style")
                     font.pointSize: 11
                     Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 }
@@ -168,12 +168,12 @@ App {
                 }
             }
 
-            //Color picker for the font
+            //font color
             RowLayout {
                 width: root.width
 
                 AppText {
-                    text: "Font Color"
+                    text: qsTr("Font Color")
                     font.pointSize: 11
                     Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 }
@@ -188,12 +188,12 @@ App {
                 }
             }
 
-            //background Color
+            //background color
             RowLayout {
                 width: root.width
 
                 AppText {
-                    text: "Background Color"
+                    text: qsTr("Background Color")
                     font.pointSize: 11
                     Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 }
@@ -208,12 +208,12 @@ App {
                 }
             }
 
-            //Color picker for the font
+            //background image
             RowLayout {
                 width: root.width
 
                 AppText {
-                    text: "Background Image"
+                    text: qsTr("Background Image")
                     font.pointSize: 11
                     Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 }
@@ -229,12 +229,12 @@ App {
                 }
             }
 
-            //Color picker for the font
+            //background shape
             RowLayout {
                 width: root.width
 
                 AppText {
-                    text: "Background Shape"
+                    text: qsTr("Background Shape")
                     font.pointSize: 11
                     Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 }
@@ -245,6 +245,30 @@ App {
                     model: ["Square", "Rectangle", "Circle", "Triangle"]
                     onCurrentIndexChanged: {
                         backEnd.backgroundShape(backgroundShapeComboBox.currentIndex)
+                    }
+                }
+            }
+
+            //background shape
+            RowLayout {
+                width: root.width
+
+                AppText {
+                    text: qsTr("Shape Size")
+                    font.pointSize: 11
+                    Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                }
+
+                ComboBox {
+                    id: shapeSizeComboBox
+                    Layout.alignment: Qt.AlignRight
+                    model: ["Standard", "Medium", "Large", "Extra Large"]
+
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("Standard: 595 x 842 pixels\nMedium: 892 x 1263 pixels\nLarge: 1190 x 1684 pixels\nExtra Large: 1785 x 2526 pixels")
+
+                    onCurrentIndexChanged: {
+                        backEnd.shapeSize(shapeSizeComboBox.currentIndex)
                     }
                 }
             }

@@ -20,13 +20,10 @@ QVector<QPair<QString, bool>> DatabaseHelper::selectIgnoreList()
         qDebug() << m_query.lastError();
     }
 
-    m_query.first();
-
-    do
+    while(m_query.next())
     {
         ignoreList.append(QPair<QString, bool>(m_query.value(0).toString(), m_query.value(1).toBool()));
     }
-    while(m_query.next());
 
     m_query.finish();
 
@@ -46,13 +43,10 @@ QVector<QString> DatabaseHelper::selectActiveIgnoreList()
         qDebug() << m_query.lastError();
     }
 
-    m_query.first();
-
-    do
+    while(m_query.next())
     {
         ignoreList.append(m_query.value(0).toString());
     }
-    while(m_query.next());
 
     m_query.finish();
 
@@ -175,9 +169,7 @@ void DatabaseHelper::createDatabase(bool flag)
         insertIgnoreWord("it");
         insertIgnoreWord("or");
         insertIgnoreWord("is");
-
-        //debug
-        updateWordActiveFlag("and", false);
+        insertIgnoreWord("a");
     }
     else
     {
