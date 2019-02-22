@@ -6,11 +6,12 @@ WordPainter::WordPainter(QWidget *parent,
                          const QColor &font_color,
                          const QColor &background_color,
                          const QString &shape,
-                         const QString &size,
+                         const QSize &size,
                          const QUrl &url
                         ) : QWidget(parent)
 {
     qDebug() << "Word Painter Class";
+
     m_words = words;
     m_font_style = font;
     m_font_color = font_color;
@@ -19,26 +20,49 @@ WordPainter::WordPainter(QWidget *parent,
     m_shape_size = size;
     m_background_image_url = url;
 
-    qDebug() << "Size: " << m_shape_size;
-    //widget parameters
-    setMinimumSize(QSize(595, 842));
-    setMaximumSize(QSize(1920,1080));
+    //update the length x width if they should be equal
+    if(m_background_shape == "Circle" || m_background_shape == "Square")
+    {
+        m_shape_size =  QSize(m_shape_size.height(), m_shape_size.height());
+    }
+
+    m_image = QImage(QSize(m_shape_size), QImage::Format_RGB32);
+
+    m_container = new QLabel(this);
+    m_container->setScaledContents(true);
+
+    m_layout = new QVBoxLayout();
+    m_layout->addWidget(m_container);
+
+    setLayout(m_layout);
+    setMinimumSize(m_shape_size);
+    setMaximumSize(m_shape_size);
+}
+
+QImage WordPainter::getImage()
+{
+    return m_image;
 }
 
 void WordPainter::paintEvent(QPaintEvent *)
 {
-    QPainter painter(this);
+    //paint into the image
+    QPainter painter(&m_image);
     painter.setBackground(QBrush(m_background_color));
     painter.setBackgroundMode(Qt::OpaqueMode);
     painter.setRenderHint(QPainter::Antialiasing,true);
 
     //drawing the shape that contains the words
-    painter.setPen (Qt::NoPen);//no 'outline' for the shape
+    if(m_background_color != QColor(Qt::white))
+    {
+        painter.setPen(Qt::NoPen);//no outline of the shape
+    }
+
     painter.setBrush(QBrush(m_background_color));
 
     if(m_background_shape == "Circle")
     {
-        painter.drawEllipse(0,0,1250,1250);
+        painter.drawEllipse(0,0,m_shape_size.width(), m_shape_size.height());
     }
     else if(m_background_shape == "Triangle")
     {
@@ -46,8 +70,8 @@ void WordPainter::paintEvent(QPaintEvent *)
         qreal startPointY1 = startPointX1;
         qreal endPointX1 = startPointX1;
 
-        qreal endPointY1 = 950;
-        qreal endPointX2 = endPointY1;
+        qreal endPointY1 = m_shape_size.height();
+        qreal endPointX2 = m_shape_size.width();
         qreal endPointY2 = endPointY1;
 
         QPainterPath path;
@@ -57,35 +81,72 @@ void WordPainter::paintEvent(QPaintEvent *)
         path.lineTo(endPointX2, endPointY2);
         path.lineTo(startPointX1, startPointY1);
 
-        painter.fillPath(path, QBrush(m_background_color));
+        if(m_background_image_url != QUrl())
+        {
+            //painter.drawPixmap(QRect(QPoint(0,0),QPoint(m_shape_size.width(), m_shape_size.height())),QPixmap(m_background_image_url.toLocalFile()));
+
+            //only apply the color tint if its not the color white
+            if(m_background_color != QColor(Qt::white))
+            {
+                painter.setOpacity(0.5);//from [0 - 1] with 1 being opaque.
+                painter.fillPath(path, QBrush(m_background_color));
+            }
+        }
+        else
+        {
+            painter.fillPath(path, QBrush(m_background_color));
+        }
     }
-    else if(m_background_shape == "Square")
+    else if(m_background_shape == "Square" || m_background_shape == "Rectangle")
     {
-        painter.drawRect(0,0,850,850);
-    }
-    else if(m_background_shape == "Rectangle")
-    {
-        painter.drawRect(0,0,1700,1000);
+        if(m_background_image_url != QUrl())
+        {
+            painter.drawPixmap(QRect(QPoint(0,0),QPoint(m_shape_size.width(), m_shape_size.height())),QPixmap(m_background_image_url.toLocalFile()));
+
+            //only apply the color tint if its not the color white
+            if(m_background_color != QColor(Qt::white))
+            {
+                painter.setOpacity(0.5);//from [0 - 1] with 1 being opaque.
+                painter.drawRect(0,0,m_shape_size.width(), m_shape_size.height());
+            }
+        }
+        else
+        {
+            painter.drawRect(0,0,m_shape_size.width(), m_shape_size.height());
+        }
     }
 
     //drawing the words
     painter.setFont(m_font_style);
     painter.setPen(m_font_color);
+    painter.setBrush(Qt::NoBrush);
 
     //debug
     int x = 50;
     int y = 50;
-    painter.save();
-    painter.rotate(15);//in terms of degrees - clockwise rotation
-    painter.scale(1.5,1.5);//in terms of % == 1.0 = %100
+
+    painter.rotate(0);//in terms of degrees - clockwise rotation (+). counter clockwise (-)
 
     for(QPair<int, QString> pair : m_words)
     {
+        painter.scale(1 * pair.first,1 * pair.first);//in terms of percent. 1.0 = %100, < 1.0 shrink. > 1.0 grow
         painter.drawText(x, y, pair.second);
-        x += 50;
-        y += 15;
+
+        //basic layout of words
+        if(x >= m_shape_size.width())
+        {
+            x = 0;
+            y += 50;
+
+        }
+        else
+        {
+            x += 50;
+        }
     }
 
-    painter.restore();
-    painter.drawPixmap(QRect(QPoint(0,0),QPoint(595, 842)),QPixmap(m_background_image_url.toLocalFile()));
+    //update the label with the new updated image
+    m_container->setPixmap(QPixmap::fromImage(m_image));
 }
+
+

@@ -3,19 +3,20 @@
 //constructor
 BackEnd::BackEnd(QObject *parent) : QObject(parent)
 {
-    //set the default formatting values
-    resetInputs();
-
     //add the same entries that appear in QML
     m_background_shapes_list.append("Square");
     m_background_shapes_list.append("Rectangle");
     m_background_shapes_list.append("Circle");
     m_background_shapes_list.append("Triangle");
 
-    m_shape_size_list.append("Standard");
-    m_shape_size_list.append("Medium");
-    m_shape_size_list.append("Large");
-    m_shape_size_list.append("Extra Large");
+    //these pairs reference the sizing in QML - Normal, Medium, Large, Extra Large
+    m_shape_size_list.append(QSize(595,842));
+    m_shape_size_list.append(QSize(892,1263));
+    m_shape_size_list.append(QSize(1190,1684));
+    m_shape_size_list.append(QSize(1785,2526));
+
+    //set the default formatting values
+    resetInputs();
 }
 
 //PUBLIC FUNCTIONS
@@ -63,12 +64,12 @@ void BackEnd::setBackgroundImageUrl(const QUrl &url)
 //Q_INVOKABLE
 void BackEnd::backgroundShape(const int &index)
 {
-    m_background_shape = m_background_shapes_list.at(index);
+    m_background_shape = m_background_shapes_list[index];
 }
 
 void BackEnd::shapeSize(const int &index)
 {
-    m_shape_size = m_shape_size_list.at(index);
+    m_shape_size = m_shape_size_list[index];
 }
 
 //given a URL for a text file, this function will extract the contents of it and store
@@ -103,13 +104,12 @@ QString BackEnd::textFileContents(const QUrl &url)
 //has made will be lost when this function is called.
 void BackEnd::resetInputs()
 {
-    //set variables to their default format values
     m_font_style = QFont("Sans Serif,9,-1,5,50,0,0,0,0,0");//sans serif, 9 font size
-    m_font_color = QColor(0, 0, 0, 1);//black
-    m_background_color = QColor(1, 1, 1, 1);//white
-    m_background_shape = "Square";
-    m_background_shape = "Standard";
-    m_background_image_url = QUrl();
+    m_font_color = QColor(Qt::black);
+    m_background_color = QColor(Qt::white);
+    m_background_shape = m_background_shapes_list[0];
+    m_shape_size = m_shape_size_list[0];
+    m_background_image_url = QUrl();//debug: "file:///home/chris/Documents/IMG_20190103_185008.jpg"
     m_word_list.clear();
     m_word_list_ordered.clear();
 }
@@ -118,7 +118,7 @@ void BackEnd::resetInputs()
 //are valid, the word map dialog will open (1), else an error dialog will be shown (-1)
 QString BackEnd::generateWordMap(QString text)
 {
-    //check to ensure all variables are set
+    //check to ensure all required variables are set
     if(text != "") {
         //generate a hashmap to get the frequency of each word
         m_word_list.operator=(wordList(text));
@@ -161,13 +161,13 @@ QHash<QString, int> BackEnd::wordList(QString &text)
 
     QHash<QString, int> hash;
 
-    //remove everything except for letters and change to lowercase. Keeps the white space
+    //remove everything except for letters and change to lowercase. Keeps the white space in order to split
     text = text.replace("\n", " ");
     text = text.remove(QRegularExpression("[^a-zA-Z\\s]"));
     text = text.toLower();
 
     //qDebug() << "Text Words: ";
-    //seperate each word and insert it into the data structures
+    //seperate each word and insert it into the data structure
     for(QString word : text.split(" ", QString::SkipEmptyParts))
     {
         //only add the word if it doesnt appear in the active ignored word list

@@ -13,6 +13,8 @@
 #include <QVector>
 #include <QDebug>
 #include <QVBoxLayout>
+#include <QImage>
+#include <QLabel>
 
 class WordPainter : public QWidget
 {
@@ -24,8 +26,10 @@ public:
                          const QColor &font_color = QColor(),
                          const QColor &background_color = QColor(),
                          const QString &shape = "",
-                         const QString &size = "",
+                         const QSize &size = QSize(),
                          const QUrl &url = QUrl());
+
+    QImage getImage();
 
     void paintEvent(QPaintEvent *);
 
@@ -35,9 +39,12 @@ private:
     QColor m_font_color;
     QColor m_background_color;
     QString m_background_shape;
-    QString m_shape_size;
+    QSize m_shape_size;
     QUrl m_background_image_url;
-};
 
+    QImage m_image;
+    QVBoxLayout *m_layout;
+    QLabel *m_container;
+};
 
 #endif // WORDPAINTER_H

@@ -22,7 +22,7 @@ public:
             const QColor &font_color = QColor(),
             const QColor &background_color = QColor(),
             const QString &shape = "",
-            const QString &size = "",
+            const QSize &size = QSize(),
             const QUrl &url = QUrl());
 
     void showEvent(QShowEvent*);
@@ -36,7 +36,7 @@ private:
     QColor m_font_color;
     QColor m_background_color;
     QString m_background_shape;
-    QString m_shape_size;
+    QSize m_shape_size;
     QUrl m_background_image_url;
 
     WordPainter *m_painter;

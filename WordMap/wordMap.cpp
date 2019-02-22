@@ -6,7 +6,7 @@ WordMap::WordMap(QDialog *parent,
                  const QColor &font_color,
                  const QColor &background_color,
                  const QString &shape,
-                 const QString &size,
+                 const QSize &size,
                  const QUrl &url
                 ) : QDialog(parent)
 {
@@ -62,12 +62,13 @@ void WordMap::showEvent(QShowEvent *event)
     setLayout(m_main_layout);
 }
 
+//export the image to a .png file that was in: qpainter->qimage->qlabel.
 void WordMap::saveImage()
 {
-    QString saveFileName = QFileDialog::getSaveFileName(this, tr("Save File"), "WordMap", tr("Images (*.png *.xpm *.jpg)"));
+    QString saveFileName = QFileDialog::getSaveFileName(this, tr("Save File"), "WordMap", tr("Images (*.png)"));
 
     qDebug() << "Save Word Map to Image File!";
     qDebug() << "File Name: " << saveFileName;
-
+    m_painter->getImage().save(saveFileName, "png");
     //write the painter object to the save file
 }

@@ -54,12 +54,12 @@ private:
     QColor m_font_color;
     QColor m_background_color;
     QString m_background_shape;
-    QString m_shape_size;
+    QSize m_shape_size;
     QUrl m_background_image_url;
 
     //lists that are identical to their QML counterparts
     QVector<QString> m_background_shapes_list;
-    QVector<QString> m_shape_size_list;
+    QVector<QSize> m_shape_size_list;
 
     //non ordered list of words and their frequencies
     QHash<QString, int> m_word_list;
