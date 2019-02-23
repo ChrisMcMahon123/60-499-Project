@@ -262,10 +262,10 @@ App {
                 ComboBox {
                     id: shapeSizeComboBox
                     Layout.alignment: Qt.AlignRight
-                    model: ["Standard", "Medium", "Large", "Extra Large"]
+                    model: ["Normal", "Medium", "Large", "Extra Large"]
 
                     ToolTip.visible: hovered
-                    ToolTip.text: qsTr("Standard: 595 x 842 pixels\nMedium: 892 x 1263 pixels\nLarge: 1190 x 1684 pixels\nExtra Large: 1785 x 2526 pixels")
+                    ToolTip.text: qsTr("Normal: 595 x 842 pixels\nMedium: 892 x 1263 pixels\nLarge: 1190 x 1684 pixels\nExtra Large: 1785 x 2526 pixels")
 
                     onCurrentIndexChanged: {
                         backEnd.shapeSize(shapeSizeComboBox.currentIndex)
@@ -299,6 +299,8 @@ App {
                 onClicked: {
                     backEnd.resetInputs()
                     textArea.text = ""
+                    shapeSizeComboBox.currentIndex = 0
+                    backgroundShapeComboBox.currentIndex = 0
                 }
             }
 

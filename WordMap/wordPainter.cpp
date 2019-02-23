@@ -47,22 +47,46 @@ QImage WordPainter::getImage()
 void WordPainter::paintEvent(QPaintEvent *)
 {
     //paint into the image
+    QPixmap pixmap = QPixmap(m_background_image_url.toLocalFile());
+
     QPainter painter(&m_image);
-    painter.setBackground(QBrush(m_background_color));
-    painter.setBackgroundMode(Qt::OpaqueMode);
     painter.setRenderHint(QPainter::Antialiasing,true);
 
-    //drawing the shape that contains the words
-    if(m_background_color != QColor(Qt::white))
+    painter.save();
+    painter.setBackground(QBrush(m_background_color));
+    painter.setBackgroundMode(Qt::OpaqueMode);
+    //drawing the background and shapes
+    painter.setBrush(QBrush(QColor(Qt::white)));
+    painter.setPen(Qt::NoPen);//no outline of the shape
+    painter.drawRect(0,0,m_shape_size.width(), m_shape_size.height());//white background
+
+    //have a black outline if there is no image or background color
+    if(m_background_color == QColor(Qt::white))
     {
-        painter.setPen(Qt::NoPen);//no outline of the shape
+        painter.setPen(Qt::black);
     }
 
     painter.setBrush(QBrush(m_background_color));
 
     if(m_background_shape == "Circle")
     {
-        painter.drawEllipse(0,0,m_shape_size.width(), m_shape_size.height());
+        if(m_background_image_url != QUrl())
+        {
+            QPainterPath path;
+            path.addEllipse(0,0,m_shape_size.width(), m_shape_size.height());
+            painter.setClipPath(path);
+            painter.drawPixmap(0,0,m_shape_size.width(), m_shape_size.height(), pixmap);
+
+            if(m_background_color != QColor(Qt::white))
+            {
+                painter.setOpacity(0.5);//from [0 - 1] with 1 being opaque.
+                painter.drawEllipse(0,0,m_shape_size.width(), m_shape_size.height());
+            }
+        }
+        else
+        {
+            painter.drawEllipse(0,0,m_shape_size.width(), m_shape_size.height());
+        }
     }
     else if(m_background_shape == "Triangle")
     {
@@ -76,14 +100,14 @@ void WordPainter::paintEvent(QPaintEvent *)
 
         QPainterPath path;
         path.moveTo(startPointX1, startPointY1);
-
         path.lineTo(endPointX1, endPointY1);
         path.lineTo(endPointX2, endPointY2);
         path.lineTo(startPointX1, startPointY1);
 
         if(m_background_image_url != QUrl())
         {
-            //painter.drawPixmap(QRect(QPoint(0,0),QPoint(m_shape_size.width(), m_shape_size.height())),QPixmap(m_background_image_url.toLocalFile()));
+            painter.setClipPath(path);
+            painter.drawPixmap(0,0,m_shape_size.width(), m_shape_size.height(), pixmap);
 
             //only apply the color tint if its not the color white
             if(m_background_color != QColor(Qt::white))
@@ -94,14 +118,22 @@ void WordPainter::paintEvent(QPaintEvent *)
         }
         else
         {
-            painter.fillPath(path, QBrush(m_background_color));
+            //draw the outline of the shape if its the color white
+            if(m_background_color != QColor(Qt::white))
+            {
+                painter.fillPath(path, QBrush(m_background_color));
+            }
+            else
+            {
+                painter.strokePath(path, QPen(QColor(Qt::black)));
+            }
         }
     }
     else if(m_background_shape == "Square" || m_background_shape == "Rectangle")
     {
         if(m_background_image_url != QUrl())
         {
-            painter.drawPixmap(QRect(QPoint(0,0),QPoint(m_shape_size.width(), m_shape_size.height())),QPixmap(m_background_image_url.toLocalFile()));
+            painter.drawPixmap(QRect(QPoint(0,0),QPoint(m_shape_size.width(), m_shape_size.height())), pixmap);
 
             //only apply the color tint if its not the color white
             if(m_background_color != QColor(Qt::white))
@@ -117,9 +149,9 @@ void WordPainter::paintEvent(QPaintEvent *)
     }
 
     //drawing the words
+    painter.restore();
     painter.setFont(m_font_style);
     painter.setPen(m_font_color);
-    painter.setBrush(Qt::NoBrush);
 
     //debug
     int x = 50;
