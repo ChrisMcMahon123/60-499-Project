@@ -63,6 +63,8 @@ void WordPainter::paintEvent(QPaintEvent *)
         painter.setPen(Qt::NoPen);//no outline of the shape
         painter.drawRect(0,0,m_shape_size.width(), m_shape_size.height());//white background
 
+        QPolygonF triangleClipArea;
+
         //have a black outline if there is no image or background color
         if(m_background_color == QColor(Qt::white))
         {
@@ -129,6 +131,11 @@ void WordPainter::paintEvent(QPaintEvent *)
                     painter.strokePath(path, QPen(QColor(Qt::black)));
                 }
             }
+
+            triangleClipArea.push_back(QPointF(0,0));
+            triangleClipArea.push_back(QPointF(m_shape_size.width(),0));
+            triangleClipArea.push_back(QPointF(m_shape_size.width(),m_shape_size.height()));
+
         }
         else if(m_background_shape == "Square" || m_background_shape == "Rectangle")
         {
@@ -162,7 +169,17 @@ void WordPainter::paintEvent(QPaintEvent *)
         //x += (a + b * angle) * qCos(angle);
         //y += (a + b * angle) * qSin(angle);
         //starting from the center of the drawing area
-        const QPointF center = QPointF(m_shape_size.width() / 2, m_shape_size.height() / 2);
+        QPointF center;
+
+        if(m_background_shape == "Triangle")
+        {
+            center = QPointF(0, m_shape_size.height() / 2);
+        }
+        else
+        {
+            center = QPointF(m_shape_size.width() / 2, m_shape_size.height() / 2);
+        }
+
         //offset between spirals
         const int a = 1;//turns the spiral
         const int b = 1;//controls the distance between successive turnings
@@ -227,14 +244,32 @@ void WordPainter::paintEvent(QPaintEvent *)
                 do
                 {
                     angle = 0.1 * i;
+
                     x = center.x() + (a + b * angle) * qCos(angle);
                     y = center.y() + (a + b * angle) * qSin(angle);
+
+                    //for triangle, mirror the x value over to a potentially correct value
+                    if(x < 0)
+                    {
+                        x *= -1;
+                    }
+
                     //painter.drawPoint(QPointF(x,y));
                     point1 = QPointF(x,y);
                     point2 = QPointF(x + width + offsetX, y + height + offsetY);
                     //wordOutline = QRectF(x, y, width + offsetX, height + offsetY);
                     wordOutline = QRectF(point1, point2);
                     polygonCurrent = QPolygonF(wordOutline);
+
+                    if(m_background_shape == "Triangle")
+                    {
+                        if(triangleClipArea.intersects(polygonCurrent))
+                        {
+                            overlap = true;
+                            ++ i;
+                            break;
+                        }
+                    }
 
                     //check for collisions with other words
                     for(QPolygonF polygonCheck : boundingBoxesList)
@@ -259,9 +294,17 @@ void WordPainter::paintEvent(QPaintEvent *)
                 {
 
                 }
-                if(m_background_shape == "Triangle")
+                else if(m_background_shape == "Triangle")
                 {
+                    if((x + width + offsetX) >= m_shape_size.width() || x < 0)
+                    {
+                        clipping = true;
+                    }
 
+                    if((y + height + offsetY) >= m_shape_size.height())
+                    {
+                        clipping = true;
+                    }
                 }
                 else if(m_background_shape == "Square" || m_background_shape == "Rectangle")
                 {
