@@ -52,7 +52,7 @@ private:
     QVBoxLayout *m_layout;
     QLabel *m_container;
 
-    bool flag = true;
+    bool drawOnceFlag = true;
 };
 
 #endif // WORDPAINTER_H
