@@ -2,12 +2,14 @@
 #define WORDPAINTER_H
 
 #include <QWidget>
+#include <QOpenGLWidget>
 #include <QBrush>
 #include <QPixmap>
 #include <QPainter>
 #include <QFont>
 #include <QColor>
 #include <QUrl>
+#include <QDebug>
 #include <QPair>
 #include <QString>
 #include <QVector>
@@ -15,6 +17,10 @@
 #include <QVBoxLayout>
 #include <QImage>
 #include <QLabel>
+#include <QFontMetrics>
+#include <QtMath>
+#include <QRandomGenerator>
+#include <QDateTime>
 
 class WordPainter : public QWidget
 {
@@ -45,6 +51,8 @@ private:
     QImage m_image;
     QVBoxLayout *m_layout;
     QLabel *m_container;
+
+    bool flag = true;
 };
 
 #endif // WORDPAINTER_H

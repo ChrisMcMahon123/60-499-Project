@@ -133,6 +133,13 @@ QString BackEnd::generateWordMap(QString text)
             //get an ordered vector of the words
             m_word_list_ordered.operator=(wordListOrdered(m_word_list));
 
+            for(auto iterator = m_word_list_ordered.rbegin(); iterator != m_word_list_ordered.rend();)
+            {
+                qDebug() << "Word: " << iterator->second << " | Frequency: " << iterator->first;
+
+                ++ iterator;
+            }
+
             //display the Word Map Dialog
             WordMap wordMap(nullptr, m_word_list_ordered, m_font_style, m_font_color, m_background_color, m_background_shape, m_shape_size, m_background_image_url);
 
@@ -202,7 +209,7 @@ QVector<QPair<int, QString>> BackEnd::wordListOrdered(const QHash<QString, int> 
     }
 
     //sorts in accending order
-    qSort(wordList.begin(), wordList.end());
+    std::sort(wordList.begin(), wordList.end());
 
     /*
     qDebug() << "Sorted Word List: ";
@@ -211,5 +218,6 @@ QVector<QPair<int, QString>> BackEnd::wordListOrdered(const QHash<QString, int> 
         qDebug() << "Key: " << pair.first << " Value: " << pair.second;
     }
     */
+
     return wordList;
 }
