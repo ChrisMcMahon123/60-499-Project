@@ -61,8 +61,44 @@ void WordPainter::paintEvent(QPaintEvent *)
         painter.setPen(Qt::NoPen);//no outline of the shape
         painter.drawRect(0,0,m_shape_size.width(), m_shape_size.height());//white background
 
-        QPainterPath path;
+        //Archimedean Spiral
+        //Formula:
+        //x += (a + b * angle) * qCos(angle);
+        //y += (a + b * angle) * qSin(angle);
+        const int a = 1;//turns the spiral
+        const int b = 1;//controls the distance between successive turnings
+        double angle = 0.0;//angle of the spiral
+        int i = 0;//current iteration of the spiral
+
+        //offset between words
+        const int offsetX = 10;
+        const int offsetY = 10;
+
+        QVector<QPolygonF> boundingBoxesList;
+        QPolygonF currentWord;
         QPolygonF validRegion;
+        QPainterPath path;
+
+        const QPointF center = QPointF(m_shape_size.width() / 2, m_shape_size.height() / 2);
+
+        QPointF point1;
+        QPointF point2;
+        QPointF point3;
+        QPointF point4;
+
+        //coordinates
+        qreal x = 0;
+        qreal y = 0;
+
+        //will be overwritten on every word iteration
+        QRectF boundingBox;
+        qreal width = 0;
+        qreal height = 0;
+        QFont font;
+        int frequency = 0;
+        QString word;
+
+        bool invalidPositionFlag;
 
         //have a black outline if there is no image or background color
         if(m_background_color == QColor(Qt::white))
@@ -74,14 +110,19 @@ void WordPainter::paintEvent(QPaintEvent *)
 
         if(m_background_shape == "Circle")
         {
+            //generate points for the polygon that will act as the shapes edges
+            //any more points than 65 will result in points connecting across circle
+            for(int z = 0; z < 65;)
+            {
+                angle = 0.1 * z;
 
-            validRegion.push_back(QPointF(m_shape_size.width() / 2, 0));
+                x = center.x() + center.x() * qCos(angle);
+                y = center.y() + center.y() * qSin(angle);
 
-            validRegion.push_back(QPointF(m_shape_size.width(), m_shape_size.height() / 2));
+                validRegion.push_back(QPointF(x, y));
 
-            validRegion.push_back(QPointF(m_shape_size.width() / 2, m_shape_size.height()));
-
-            validRegion.push_back(QPointF(0, m_shape_size.height() / 2));
+                ++ z;
+            }
 
             if(m_background_image_url != QUrl())
             {
@@ -100,8 +141,8 @@ void WordPainter::paintEvent(QPaintEvent *)
                 painter.drawEllipse(0, 0, m_shape_size.width(), m_shape_size.height());
             }
 
-            painter.setPen(Qt::red);
-            painter.drawPolygon(validRegion);
+            //painter.setPen(Qt::red);
+            //painter.drawPolygon(validRegion);
         }
         else if(m_background_shape == "Triangle")
         {
@@ -117,9 +158,6 @@ void WordPainter::paintEvent(QPaintEvent *)
             validRegion.push_back(mPeak);
             validRegion.push_back(bRight);
             validRegion.push_back(bLeft);
-
-            painter.setPen(Qt::red);
-            painter.drawPolygon(validRegion);
 
             if(m_background_image_url != QUrl())
             {
@@ -145,13 +183,13 @@ void WordPainter::paintEvent(QPaintEvent *)
                     painter.strokePath(path, QPen(QColor(Qt::black)));
                 }
             }
+
+            //painter.setPen(Qt::red);
+            //painter.drawPolygon(validRegion);
         }
         else if(m_background_shape == "Square" || m_background_shape == "Rectangle")
         {
             validRegion = QPolygonF(QRectF(QPoint(0, 0),QPoint(m_shape_size.width(), m_shape_size.height())));
-
-            painter.setPen(Qt::red);
-            painter.drawPolygon(validRegion);
 
             if(m_background_image_url != QUrl())
             {
@@ -168,6 +206,9 @@ void WordPainter::paintEvent(QPaintEvent *)
             {
                 painter.drawRect(0, 0, m_shape_size.width(), m_shape_size.height());
             }
+
+            //painter.setPen(Qt::red);
+            //painter.drawPolygon(validRegion);
         }
 
         //need to keep path for clipping purposes
@@ -176,45 +217,8 @@ void WordPainter::paintEvent(QPaintEvent *)
         painter.setFont(m_font_style);
         painter.setPen(m_font_color);
         painter.setOpacity(1);
+
         //painter.rotate(0);//in terms of degrees - clockwise rotation (+). counter clockwise (-)
-
-        //Archimedean Spiral
-        //Formula:
-        //x += (a + b * angle) * qCos(angle);
-        //y += (a + b * angle) * qSin(angle);
-        const int a = 1;//turns the spiral
-        const int b = 1;//controls the distance between successive turnings
-        double angle = 0.0;//angle of the spiral
-        int i = 0;//current iteration of the spiral
-
-        //offset between words
-        const int offsetX = 10;
-        const int offsetY = 10;
-
-        QVector<QPolygonF> boundingBoxesList;
-        QPolygonF currentWord;
-
-        const QPointF center = QPointF(m_shape_size.width() / 2, m_shape_size.height() / 2);
-
-        QPointF point1;
-        QPointF point2;
-        QPointF point3;
-        QPointF point4;
-
-        //coordinates
-        qreal x = 0;
-        qreal y = 0;
-
-        //will be overwritten on every word iteration
-        QRectF boundingBox;
-        qreal width = 0;
-        qreal height = 0;
-        QFont font;
-        int frequency = 0;
-        QString word;
-
-        bool overlap;
-        bool validWord;
 
         for(auto iterator = m_words.rbegin(); iterator != m_words.rend();)
         {
@@ -228,16 +232,16 @@ void WordPainter::paintEvent(QPaintEvent *)
             font.setPointSize(font.pointSize() + frequency);
             painter.setFont(font);
 
-            //get the bounding box of the word and determine its dimensions
-            QFontMetrics fontMetrics = painter.fontMetrics();
-            boundingBox = fontMetrics.boundingRect(word);
-            width = boundingBox.width();
-            height = static_cast<int>(boundingBox.height() / 1.4);
-
+            //if the word doesnt fit, skip it
             do
             {
-                overlap = false;
-                validWord = false;
+                //get the bounding box of the word and determine its dimensions
+                QFontMetrics fontMetrics = painter.fontMetrics();
+                boundingBox = fontMetrics.boundingRect(word);
+                width = boundingBox.width();
+                height = static_cast<int>(boundingBox.height() / 1.4);
+
+                invalidPositionFlag = false;
 
                 //Archimedean Spiral calculation
                 angle = 0.1 * i;
@@ -255,36 +259,32 @@ void WordPainter::paintEvent(QPaintEvent *)
                    !validRegion.containsPoint(point3, Qt::OddEvenFill) ||
                    !validRegion.containsPoint(point4, Qt::OddEvenFill))
                 {
-                    overlap = true;
+                    invalidPositionFlag = true;
                     ++ i;
                     break;
                 }
-                else
-                {
-                    validWord = true;
-                }
 
-                //check for collisions with other words
-                currentWord = QPolygonF(QRectF(point1, point2));//just need two points to draw rectangle
-
-                for(QPolygonF otherWord : boundingBoxesList)
+                //only check if the word doesnt collide with the edge of the shape
+                if(!invalidPositionFlag)
                 {
-                    if(currentWord.intersects(otherWord))
+                    //check for collisions with other words
+                    currentWord = QPolygonF(QRectF(point1, point2));//just need two points to draw rectangle
+
+                    for(QPolygonF otherWord : boundingBoxesList)
                     {
-                        overlap = true;
-                        ++ i;
-                        break;
-                    }
-                    else
-                    {
-                        validWord = true;
+                        if(currentWord.intersects(otherWord))
+                        {
+                            invalidPositionFlag = true;
+                            ++ i;
+                            break;
+                        }
                     }
                 }
             }
-            while(overlap && !validWord);
+            while(invalidPositionFlag);
 
             //only draw the word if its in a valid position
-            if(!overlap && validWord)
+            if(!invalidPositionFlag)
             {
                 boundingBoxesList.append(currentWord);
                 //painter.drawPolygon(polygonCurrent);
@@ -305,5 +305,3 @@ void WordPainter::paintEvent(QPaintEvent *)
 
     drawOnceFlag = false;
 }
-
-
