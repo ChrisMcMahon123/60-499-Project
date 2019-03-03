@@ -99,6 +99,7 @@ void WordPainter::paintEvent(QPaintEvent *)
         QString word;
 
         bool invalidPositionFlag;
+        bool loopWordsFlag = false;
 
         //have a black outline if there is no image or background color
         if(m_background_color == QColor(Qt::white))
@@ -219,8 +220,9 @@ void WordPainter::paintEvent(QPaintEvent *)
         painter.setOpacity(1);
 
         //painter.rotate(0);//in terms of degrees - clockwise rotation (+). counter clockwise (-)
+        auto iterator = m_words.rbegin();
 
-        for(auto iterator = m_words.rbegin(); iterator != m_words.rend();)
+        while((x < m_shape_size.width() * 1.5) && y < (m_shape_size.height() * 1.5))
         {
             painter.save();
 
@@ -229,8 +231,12 @@ void WordPainter::paintEvent(QPaintEvent *)
 
             //set the size of the font depending on the frequency of the word
             font = painter.font();
-            font.setPointSize(font.pointSize() + frequency);
-            painter.setFont(font);
+
+            if(!loopWordsFlag)
+            {
+                font.setPointSize(font.pointSize() + frequency);
+                painter.setFont(font);
+            }
 
             //if the word doesnt fit, skip it
             do
@@ -293,11 +299,14 @@ void WordPainter::paintEvent(QPaintEvent *)
 
             painter.restore();
             ++ iterator;
-        }
 
-        //second passthrough, go line by line and see if there are any areas to fit more words
-        //dont take into account frequency...
-        //check for collisions with the edge of the shape
+            if(iterator == m_words.rend())
+            {
+                //ran out of words, loop through existing words
+                iterator = m_words.rbegin();
+                loopWordsFlag = true;
+            }
+        }
 
         //update the label with the new updated image
         m_container->setPixmap(QPixmap::fromImage(m_image));
