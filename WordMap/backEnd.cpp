@@ -76,7 +76,9 @@ void BackEnd::shapeSize(const int &index)
 //it in a QString variable that it will return.
 QString BackEnd::textFileContents(const QUrl &url)
 {
-    QFile file(url.path());
+    QFile file(url.toLocalFile());
+
+    qDebug() << "FILE PATH: " << url.path();
 
     if(!file.open(QIODevice::ReadOnly))
     {
