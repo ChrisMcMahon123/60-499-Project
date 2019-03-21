@@ -2577,3 +2577,6 @@ build-WordMap-V_Play_Desktop_Qt_5_11_1_MinGW-Release/release/VPlayApps/utils/Dat
 build-WordMap-V_Play_Desktop_Qt_5_11_1_MinGW-Release/release/VPlayApps/vplayapps.qmltypes
 build-WordMap-V_Play_Desktop_Qt_5_11_1_MinGW-Release/release/VPlayPlugins/qmldir
 build-WordMap-V_Play_Desktop_Qt_5_11_1_MinGW-Release/release/VPlayPlugins/vplayplugins.qmltypes
+*.zip
+alice in wonderland.txt
+anne of green gables.txt

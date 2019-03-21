@@ -91,7 +91,6 @@ void WordPainter::paintEvent(QPaintEvent *)
         qreal y = 0;
 
         //will be overwritten on every word iteration
-        QRectF boundingBox;
         qreal width = 0;
         qreal height = 0;
         QFont font;
@@ -234,7 +233,7 @@ void WordPainter::paintEvent(QPaintEvent *)
 
             if(!loopWordsFlag)
             {
-                font.setPointSize(font.pointSize() + frequency);
+                font.setPointSizeF(font.pointSizeF() + frequency);
                 painter.setFont(font);
             }
 
@@ -242,10 +241,9 @@ void WordPainter::paintEvent(QPaintEvent *)
             do
             {
                 //get the bounding box of the word and determine its dimensions
-                QFontMetrics fontMetrics = painter.fontMetrics();
-                boundingBox = fontMetrics.boundingRect(word);
-                width = boundingBox.width();
-                height = static_cast<int>(boundingBox.height() / 1.4);
+                QFontMetricsF fontMetrics = painter.fontMetrics();
+                width = fontMetrics.width(word);
+                height = fontMetrics.height() / 1.5;
 
                 invalidPositionFlag = false;
 
@@ -256,9 +254,9 @@ void WordPainter::paintEvent(QPaintEvent *)
 
                 //need all 4 points of the word to determine if theres clipping on the edge
                 point1 = QPointF(x, y);
-                point2 = QPointF(x + width + offsetX, y + height + offsetY);
-                point3 = QPointF(x, y + height + offsetY);
-                point4 = QPointF(x + width + offsetX, y);
+                point2 = QPointF(x + width + offsetX, y);
+                point3 = QPointF(x, y + height + offsetY + height / 4);
+                point4 = QPointF(x + width + offsetX, y + height + offsetY + height / 4);
 
                 if(!validRegion.containsPoint(point1, Qt::OddEvenFill) ||
                    !validRegion.containsPoint(point2, Qt::OddEvenFill) ||
@@ -274,7 +272,7 @@ void WordPainter::paintEvent(QPaintEvent *)
                 if(!invalidPositionFlag)
                 {
                     //check for collisions with other words
-                    currentWord = QPolygonF(QRectF(point1, point2));//just need two points to draw rectangle
+                    currentWord = QPolygonF(QRectF(point1, point4));//just need two points to draw rectangle
 
                     for(QPolygonF otherWord : boundingBoxesList)
                     {
@@ -293,7 +291,7 @@ void WordPainter::paintEvent(QPaintEvent *)
             if(!invalidPositionFlag)
             {
                 boundingBoxesList.append(currentWord);
-                //painter.drawPolygon(polygonCurrent);
+                //painter.drawPolygon(currentWord);
                 painter.drawText(static_cast<int>(x), static_cast<int>(y + height), word);//need to compensate for the height of the word
             }
 

@@ -180,7 +180,7 @@ QHash<QString, int> BackEnd::wordList(QString &text)
     for(QString word : text.split(" ", QString::SkipEmptyParts))
     {
         //only add the word if it doesnt appear in the active ignored word list
-        if(!ignoreList.contains(word))
+        if(!ignoreList.contains(word) && word.length() > 1)
         {
             //qDebug() << "Word: " << word;
             hash[word] ++;
