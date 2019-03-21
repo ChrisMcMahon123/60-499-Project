@@ -20,10 +20,15 @@ WordPainter::WordPainter(QWidget *parent,
     m_shape_size = size;
     m_background_image_url = url;
 
-    //set the dimensions of the paint area
+    //set the dimensions of the paint area, all shapes draw area are symmetrical except for rectangle
     if(m_background_shape != "Rectangle")
     {
         m_shape_size = QSize(m_shape_size.height(), m_shape_size.height());
+    }
+
+    if(m_background_shape == "Custom")
+    {
+        m_plotPointsFlag = true;
     }
 
     m_image = QImage(QSize(m_shape_size), QImage::Format_RGB32);
@@ -47,13 +52,13 @@ QImage WordPainter::getImage()
 void WordPainter::paintEvent(QPaintEvent *)
 {
     //only paint the widget once - major performance improvement
-    if(drawOnceFlag)
+    if(!m_drawOnceFlag)
     {
         //paint into the image
         QPixmap pixmap = QPixmap(m_background_image_url.toLocalFile());
 
         QPainter painter(&m_image);
-        painter.setRenderHint(QPainter::Antialiasing,true);
+        painter.setRenderHint(QPainter::Antialiasing, true);
         painter.setBackground(QBrush(m_background_color));
         painter.setBackgroundMode(Qt::OpaqueMode);
         //drawing the background and shapes
@@ -76,7 +81,6 @@ void WordPainter::paintEvent(QPaintEvent *)
 
         QVector<QPolygonF> boundingBoxesList;
         QPolygonF currentWord;
-        QPolygonF validRegion;
         QPainterPath path;
 
         const QPointF center = QPointF(m_shape_size.width() / 2, m_shape_size.height() / 2);
@@ -210,105 +214,221 @@ void WordPainter::paintEvent(QPaintEvent *)
             //painter.setPen(Qt::red);
             //painter.drawPolygon(validRegion);
         }
-
-        //need to keep path for clipping purposes
-        //drawing the words
-        painter.setBackgroundMode(Qt::TransparentMode);
-        painter.setFont(m_font_style);
-        painter.setPen(m_font_color);
-        painter.setOpacity(1);
-
-        //painter.rotate(0);//in terms of degrees - clockwise rotation (+). counter clockwise (-)
-        auto iterator = m_words.rbegin();
-
-        while((x < m_shape_size.width() * 1.5) && y < (m_shape_size.height() * 1.5))
+        else if(m_background_shape == "Custom")
         {
-            painter.save();
+            //show the background to the user and the background image with the center being marked
+            //then allow the user to select points by clicking around the canvas
+            //once they click 'done', clip the background to that shape and display the words
 
-            frequency = iterator->first;
-            word = iterator->second;
-
-            //set the size of the font depending on the frequency of the word
-            font = painter.font();
-
-            if(!loopWordsFlag)
+            if(m_plotPointsFlag)
             {
-                font.setPointSizeF(font.pointSizeF() + frequency);
-                painter.setFont(font);
-            }
-
-            //if the word doesnt fit, skip it
-            do
-            {
-                //get the bounding box of the word and determine its dimensions
-                QFontMetricsF fontMetrics = painter.fontMetrics();
-                width = fontMetrics.width(word);
-                height = fontMetrics.height() / 1.5;
-
-                invalidPositionFlag = false;
-
-                //Archimedean Spiral calculation
-                angle = 0.1 * i;
-                x = center.x() + (a + b * angle) * qCos(angle);
-                y = center.y() + (a + b * angle) * qSin(angle);
-
-                //need all 4 points of the word to determine if theres clipping on the edge
-                point1 = QPointF(x, y);
-                point2 = QPointF(x + width + offsetX, y);
-                point3 = QPointF(x, y + height + offsetY + height / 4);
-                point4 = QPointF(x + width + offsetX, y + height + offsetY + height / 4);
-
-                if(!validRegion.containsPoint(point1, Qt::OddEvenFill) ||
-                   !validRegion.containsPoint(point2, Qt::OddEvenFill) ||
-                   !validRegion.containsPoint(point3, Qt::OddEvenFill) ||
-                   !validRegion.containsPoint(point4, Qt::OddEvenFill))
+                if(m_background_image_url != QUrl())
                 {
-                    invalidPositionFlag = true;
-                    ++ i;
-                    break;
+                    painter.drawPixmap(QRect(QPoint(0, 0),QPoint(m_shape_size.width(), m_shape_size.height())), pixmap);
+
+                    //only apply the color tint if its not the color white
+                    if(m_background_color != QColor(Qt::white))
+                    {
+                        painter.setOpacity(0.5);//from [0 - 1] with 1 being opaque.
+                        painter.drawRect(0, 0, m_shape_size.width(), m_shape_size.height());
+                    }
+                }
+                else
+                {
+                    painter.drawRect(0, 0, m_shape_size.width(), m_shape_size.height());
                 }
 
-                //only check if the word doesnt collide with the edge of the shape
-                if(!invalidPositionFlag)
+                //draw the incomplete shape that the user is currently drawing
+                painter.setPen(Qt::red);
+                if(validRegion.length() > 1)
                 {
-                    //check for collisions with other words
-                    currentWord = QPolygonF(QRectF(point1, point4));//just need two points to draw rectangle
+                    QPointF point1 = validRegion[0];
 
-                    for(QPolygonF otherWord : boundingBoxesList)
+                    for(QPointF point2 : validRegion)
                     {
-                        if(currentWord.intersects(otherWord))
-                        {
-                            invalidPositionFlag = true;
-                            ++ i;
-                            break;
-                        }
+                        painter.drawPoint(point2);
+                        painter.drawLine(point1,point2);
+                        point1 = point2;
                     }
                 }
             }
-            while(invalidPositionFlag);
-
-            //only draw the word if its in a valid position
-            if(!invalidPositionFlag)
+            else
             {
-                boundingBoxesList.append(currentWord);
-                //painter.drawPolygon(currentWord);
-                painter.drawText(static_cast<int>(x), static_cast<int>(y + height), word);//need to compensate for the height of the word
+                //create the path that will clip the background image
+                if(validRegion.length() > 1)
+                {
+                    path.moveTo(validRegion[0]);
+
+                    for(QPointF point : validRegion)
+                    {
+                        path.lineTo(point);
+                    }
+
+                    path.lineTo(validRegion[0]);
+                }
+
+                if(m_background_image_url != QUrl())
+                {
+                    painter.setClipPath(path);
+                    painter.drawPixmap(0, 0, m_shape_size.width(), m_shape_size.height(), pixmap);
+
+                    //only apply the color tint if its not the color white
+                    if(m_background_color != QColor(Qt::white))
+                    {
+                        painter.setOpacity(0.5);//from [0 - 1] with 1 being opaque.
+                        painter.fillPath(path, QBrush(m_background_color));
+                    }
+                }
+                else
+                {
+                    //draw the outline of the shape if its the color white
+                    if(m_background_color != QColor(Qt::white))
+                    {
+                        painter.fillPath(path, QBrush(m_background_color));
+                    }
+                    else
+                    {
+                        painter.strokePath(path, QPen(QColor(Qt::black)));
+                    }
+                }
+            }
+            //painter.setPen(Qt::red);
+            //painter.drawPolygon(validRegion);
+        }
+
+        if(!m_drawOnceFlag && !m_plotPointsFlag)
+        {
+            //drawing the words
+            painter.setBackgroundMode(Qt::TransparentMode);
+            painter.setFont(m_font_style);
+            painter.setPen(m_font_color);
+            painter.setOpacity(1);
+
+            //painter.rotate(0);//in terms of degrees - clockwise rotation (+). counter clockwise (-)
+            auto iterator = m_words.rbegin();
+
+            while((x < m_shape_size.width() * 1.5) && y < (m_shape_size.height() * 1.5))
+            {
+                painter.save();
+
+                frequency = iterator->first;
+                word = iterator->second;
+
+                //set the size of the font depending on the frequency of the word
+                font = painter.font();
+
+                if(!loopWordsFlag)
+                {
+                    font.setPointSizeF(font.pointSizeF() + frequency);
+                    painter.setFont(font);
+                }
+
+                //if the word doesnt fit, skip it
+                do
+                {
+                    //get the bounding box of the word and determine its dimensions
+                    QFontMetricsF fontMetrics = painter.fontMetrics();
+                    width = fontMetrics.width(word);
+                    height = fontMetrics.height() / 1.5;
+
+                    invalidPositionFlag = false;
+
+                    //Archimedean Spiral calculation
+                    angle = 0.1 * i;
+                    x = center.x() + (a + b * angle) * qCos(angle);
+                    y = center.y() + (a + b * angle) * qSin(angle);
+
+                    //need all 4 points of the word to determine if theres clipping on the edge
+                    point1 = QPointF(x, y);
+                    point2 = QPointF(x + width + offsetX, y);
+                    point3 = QPointF(x, y + height + offsetY + height / 4);
+                    point4 = QPointF(x + width + offsetX, y + height + offsetY + height / 4);
+
+                    if(!validRegion.containsPoint(point1, Qt::OddEvenFill) ||
+                       !validRegion.containsPoint(point2, Qt::OddEvenFill) ||
+                       !validRegion.containsPoint(point3, Qt::OddEvenFill) ||
+                       !validRegion.containsPoint(point4, Qt::OddEvenFill))
+                    {
+                        invalidPositionFlag = true;
+                        ++ i;
+                        break;
+                    }
+
+                    //only check if the word doesnt collide with the edge of the shape
+                    if(!invalidPositionFlag)
+                    {
+                        //check for collisions with other words
+                        currentWord = QPolygonF(QRectF(point1, point4));//just need two points to draw rectangle
+
+                        for(QPolygonF otherWord : boundingBoxesList)
+                        {
+                            if(currentWord.intersects(otherWord))
+                            {
+                                invalidPositionFlag = true;
+                                ++ i;
+                                break;
+                            }
+                        }
+                    }
+                }
+                while(invalidPositionFlag);
+
+                //only draw the word if its in a valid position
+                if(!invalidPositionFlag)
+                {
+                    boundingBoxesList.append(currentWord);
+                    //painter.drawPolygon(currentWord);
+                    painter.drawText(static_cast<int>(x), static_cast<int>(y + height), word);//need to compensate for the height of the word
+                }
+
+                painter.restore();
+                ++ iterator;
+
+                if(iterator == m_words.rend())
+                {
+                    //ran out of words, loop through existing words
+                    iterator = m_words.rbegin();
+                    loopWordsFlag = true;
+                }
             }
 
-            painter.restore();
-            ++ iterator;
-
-            if(iterator == m_words.rend())
-            {
-                //ran out of words, loop through existing words
-                iterator = m_words.rbegin();
-                loopWordsFlag = true;
-            }
+            m_drawOnceFlag = true;
         }
 
         //update the label with the new updated image
         m_container->setPixmap(QPixmap::fromImage(m_image));
     }
+}
 
-    drawOnceFlag = false;
+void WordPainter::mousePressEvent(QMouseEvent* event)
+{
+    if(m_plotPointsFlag)
+    {
+        const QPointF point = event->pos();
+
+        qDebug() << "Point: " << point;
+
+        validRegion.push_back(point);
+    }
+}
+
+void WordPainter::doneDrawingPoints()
+{
+    m_plotPointsFlag = false;
+}
+
+bool WordPainter::validCustomShape()
+{
+    if(validRegion.length() < 3)
+    {
+        validRegion.clear();
+        return false;
+    }
+    else
+    {
+        return true;
+        //check to make sure that points (lines) dont intersect
+        //Bentley-Ottmann Algorithm
+        //The Shamos-Hoey Algorithm
+    }
 }

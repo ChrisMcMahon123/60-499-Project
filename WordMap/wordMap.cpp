@@ -40,8 +40,17 @@ void WordMap::showEvent(QShowEvent *event)
     m_save_button->setText(tr("Save Word Map"));
     m_save_button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     connect(m_save_button, SIGNAL(clicked()), this, SLOT(saveImage()));//'on button click'
-
     m_toolbar->addWidget(m_save_button);
+
+    if(m_background_shape == "Custom")
+    {
+        m_done_button = new QToolButton(m_toolbar);
+        m_done_button->setIcon(QIcon("assets/icons8-checked-50.svg"));
+        m_done_button->setText(tr("Done Plotting Points"));
+        m_done_button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        connect(m_done_button, SIGNAL(clicked()), this, SLOT(donePlottingPoints()));//'on button click'
+        m_done_action = m_toolbar->addWidget(m_done_button);
+    }
 
     //painter that will display the word map
     m_painter = new WordPainter(this, m_words, m_font_style, m_font_color, m_background_color, m_background_shape, m_shape_size, m_background_image_url);
@@ -71,4 +80,20 @@ void WordMap::saveImage()
     qDebug() << "File Name: " << saveFileName;
     m_painter->getImage().save(saveFileName, "png");
     //write the painter object to the save file
+}
+
+void WordMap::donePlottingPoints()
+{
+    if(m_painter->validCustomShape())
+    {
+        qDebug() << "Done Plotting Points!";
+        m_toolbar->removeAction(m_done_action);
+        m_painter->doneDrawingPoints();
+    }
+    else
+    {
+        QMessageBox errorMessage;
+        errorMessage.setText("Error creating custom shape, not enough points!");
+        errorMessage.exec();
+    }
 }

@@ -9,8 +9,9 @@
 #include <QIcon>
 #include <QToolButton>
 #include <QFileDialog>
+#include <QMessageBox>
 
-#include <wordPainter.h>
+#include "wordPainter.h"
 
 class WordMap : public QDialog
 {
@@ -26,9 +27,11 @@ public:
             const QUrl &url = QUrl());
 
     void showEvent(QShowEvent*);
+    bool drawValidPolygon();
 
 public slots:
-        void saveImage();
+    void saveImage();
+    void donePlottingPoints();
 
 private:
     QVector<QPair<int, QString>> m_words;
@@ -44,6 +47,8 @@ private:
     QVBoxLayout *m_main_layout;
     QToolBar *m_toolbar;
     QToolButton *m_save_button;
+    QToolButton *m_done_button;
+    QAction *m_done_action;
 };
 
 #endif // WORDMAP_H

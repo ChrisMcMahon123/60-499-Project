@@ -242,7 +242,7 @@ App {
                 ComboBox {
                     id: backgroundShapeComboBox
                     Layout.alignment: Qt.AlignRight
-                    model: ["Square", "Rectangle", "Circle", "Triangle"]
+                    model: ["Square", "Rectangle", "Circle", "Triangle","Custom"]
                     onCurrentIndexChanged: {
                         backEnd.backgroundShape(backgroundShapeComboBox.currentIndex)
                     }

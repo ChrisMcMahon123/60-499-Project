@@ -2,7 +2,7 @@
 #define WORDPAINTER_H
 
 #include <QWidget>
-#include <QOpenGLWidget>
+#include <QMouseEvent>
 #include <QBrush>
 #include <QPixmap>
 #include <QPainter>
@@ -19,8 +19,6 @@
 #include <QLabel>
 #include <QFontMetrics>
 #include <QtMath>
-#include <QRandomGenerator>
-#include <QDateTime>
 
 class WordPainter : public QWidget
 {
@@ -38,6 +36,9 @@ public:
     QImage getImage();
 
     void paintEvent(QPaintEvent *);
+    void mousePressEvent(QMouseEvent *);
+    void doneDrawingPoints();
+    bool validCustomShape();
 
 private:
     QVector<QPair<int, QString>> m_words;
@@ -52,7 +53,10 @@ private:
     QVBoxLayout *m_layout;
     QLabel *m_container;
 
-    bool drawOnceFlag = true;
+    QPolygonF validRegion;
+
+    bool m_drawOnceFlag = false;
+    bool m_plotPointsFlag = false;
 };
 
 #endif // WORDPAINTER_H

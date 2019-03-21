@@ -8,6 +8,7 @@ BackEnd::BackEnd(QObject *parent) : QObject(parent)
     m_background_shapes_list.append("Rectangle");
     m_background_shapes_list.append("Circle");
     m_background_shapes_list.append("Triangle");
+    m_background_shapes_list.append("Custom");
 
     //these pairs reference the sizing in QML - Normal, Medium, Large, Extra Large
     m_shape_size_list.append(QSize(595,842));
