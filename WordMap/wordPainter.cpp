@@ -85,10 +85,7 @@ void WordPainter::paintEvent(QPaintEvent *)
 
         const QPointF center = QPointF(m_shape_size.width() / 2, m_shape_size.height() / 2);
 
-        QPointF point1;
-        QPointF point2;
-        QPointF point3;
-        QPointF point4;
+        QPointF point1, point2, point3, point4, point5, point6, point7, point8, point9, point10;
 
         //coordinates
         qreal x = 0;
@@ -339,15 +336,23 @@ void WordPainter::paintEvent(QPaintEvent *)
                     y = center.y() + (a + b * angle) * qSin(angle);
 
                     //need all 4 points of the word to determine if theres clipping on the edge
-                    point1 = QPointF(x, y);
-                    point2 = QPointF(x + width + offsetX, y);
-                    point3 = QPointF(x, y + height + offsetY + height / 4);
-                    point4 = QPointF(x + width + offsetX, y + height + offsetY + height / 4);
+                    point1 = QPointF(x, y);//0/1 top
+                    point2 = QPointF(x + width + offsetX, y);//1/1 top
+                    point3 = QPointF(x, y + height + offsetY + (height * 0.25));//0/1 bottom
+                    point4 = QPointF(x + width + offsetX, y + height + offsetY + (height * 0.25));//1/1 bottom
+                    point5 = QPointF(x + (width * 0.5), y);//1/2 top
+                    point6 = QPointF(x + (width * 0.5), y + height + offsetY + (height * 0.25));//1/2 bottom
+                    point7 = QPointF(x + (width * 0.25), y);//1/4 top
+                    point8 = QPointF(x + (width * 0.75), y);//3/4 top
+                    point9 = QPointF(x + (width * 0.25), y + height + offsetY + (height * 0.25));//1/4 bottom
+                    point10 = QPointF(x +(width * 0.75), y + height + offsetY + (height * 0.25));//3/4 bottom
 
                     if(!validRegion.containsPoint(point1, Qt::OddEvenFill) ||
                        !validRegion.containsPoint(point2, Qt::OddEvenFill) ||
                        !validRegion.containsPoint(point3, Qt::OddEvenFill) ||
-                       !validRegion.containsPoint(point4, Qt::OddEvenFill))
+                       !validRegion.containsPoint(point4, Qt::OddEvenFill) ||
+                       !validRegion.containsPoint(point5, Qt::OddEvenFill) ||
+                       !validRegion.containsPoint(point6, Qt::OddEvenFill) )
                     {
                         invalidPositionFlag = true;
                         ++ i;
